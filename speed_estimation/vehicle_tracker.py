@@ -3,7 +3,7 @@ import supervision as sv
 import numpy as np
 import cv2
 from collections import deque
-from speed_estimation.utils.speed1 import calculate_speed
+from speed_estimation.utils.speed import calculate_speed
 from speed_estimation.config import speed_limit
 from speed_estimation.detections.detect_license import detect_license_plate
 from speed_estimation.db.db import save_record

@@ -22,10 +22,11 @@ class Record(models.Model):
     def __str__(self):
         return f"Record from {self.stationID}"
     
-
 class Vehicle(models.Model):
-    vehicle_id=models.IntegerField()
-    vehicle_image=models.ImageField()
+    owner_name=models.CharField(max_length=50,null=True)
+    licenseplate_no =models.CharField(max_length=50,null=True)
+    contact_number=models.CharField(max_length=20,null=True)
+    violation_count=models.IntegerField(default=0)
 
     def _str_(self):
-        return self.vehicle_id
+        return f"Vehicle{self.vehicle_id}"

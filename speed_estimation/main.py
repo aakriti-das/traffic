@@ -2,9 +2,10 @@ import cv2
 import numpy as np
 from speed_estimation.detections.detect_vehicle import detect_vehicle
 from .vehicle_tracker import track_vehicles
+from .config import video_path
 
 def process_video_stream():
-    cap = cv2.VideoCapture("Test_Videos/aakashePul.mp4")
+    cap = cv2.VideoCapture(video_path)
     # cap = cv2.VideoCapture(0)  # 0 for webcam; replace with IP stream if needed
     fps = cap.get(cv2.CAP_PROP_FPS)
     while True:

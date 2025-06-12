@@ -8,7 +8,7 @@ from torchvision import transforms
 import pickle
 from PIL import Image
 
-# 1. Load your YOLO model
+#Load your YOLO model
 model = YOLO("models/licensePlatesegmentation.pt")  # path to trained detector
 
 # Load classifier and class mapping (do this once)
@@ -31,8 +31,6 @@ class CharClassifier(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-# 2. Load input image
-# image_path = "plate3.png"  # replace with your image path
 
 def read_license_plate(image_input):
     print("Inside read_license_plate function")
@@ -53,15 +51,15 @@ def read_license_plate(image_input):
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     else:
         raise ValueError("Unsupported image array shape for license plate input.")
-    # 3. Run detection
+    #Run detection
     results = model.predict(source=image, conf=0.3, iou=0.4)[0]  # returns one result
 
     # Get bounding boxes (x1, y1, x2, y2)
     boxes = results.boxes.xyxy.cpu().numpy()  # shape: (N, 4)
-
+    # print("boxes:",boxes)
     # Sort boxes by x1 (left to right)
-    sorted_boxes = sorted(boxes, key=lambda b: b[0])
-
+    sorted_boxes = sorted(boxes, key=lambda b: (b[1], b[0]))   
+    # print("Sorted Boxes:",sorted_boxes)
 
     with open("models/class_mapping.pkl", "rb") as f:
         class_names = pickle.load(f)
@@ -76,14 +74,14 @@ def read_license_plate(image_input):
     transforms.ToTensor(),
     ])
 
-    # 4. Crop and Classify Each Detected Character
+    # Crop and Classify Each Detected Character
     char_crops = []
     predicted_chars = []
     for box in sorted_boxes:
         x1, y1, x2, y2 = map(int, box)
         crop = rgb_image[y1:y2, x1:x2]
-        cv2.imshow("Character Crop", crop)  # Display each crop for debugging
-        cv2.waitKey(1000)  
+        # cv2.imshow("Character Crop", crop)  # Display each crop for debugging
+        # cv2.waitKey(1000)  
         char_crops.append(crop)
 
         # Convert OpenCV image (numpy array) to PIL Image for transform
@@ -95,7 +93,7 @@ def read_license_plate(image_input):
             outputs = classifier(input_tensor)
             predicted_index = outputs.argmax(dim=1).item()
             predicted_class = class_names[predicted_index]
-            print(f"Predicted class: {predicted_class} for box {box}")
+            print(f"Predicted class: {predicted_class}")
         predicted_chars.append(predicted_class)
     license_text = ''.join(predicted_chars)
     print(f"Detected license text: {license_text}")

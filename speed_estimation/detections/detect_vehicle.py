@@ -27,7 +27,7 @@ def detect_vehicle(frame: np.ndarray) -> tuple[sv.Detections, np.ndarray]:
         conf = box.conf.item()
 
         if class_name in VEHICLE_CLASSES and conf > 0.5:
-            print(f"Detected vehicle: {class_name} with confidence {conf}")
+            print(f"Detected vehicle: {class_name}")
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             xyxy.append([x1, y1, x2, y2])
             confidences.append(conf)

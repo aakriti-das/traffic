@@ -4,17 +4,10 @@ import cv2
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
-from user_app.models import Record, Station
+from user_app.models import Record, Station,Vehicle
 from speed_estimation.config import MAC_ADDRESS
 
-def save_record(
-    speed: int,
-    count: int,
-    vehicle_image_path: str,
-    license_plate_image_path: str = None,
-    licenseplate_no: str = None,
-    station: Station = None
-):
+def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_image_path: str = None,licenseplate_no: str = None,station: Station = None):
     if station is None:
         station = Station.objects.first()
     if station is None:
@@ -69,6 +62,15 @@ def update_record(record_id: int,licenseplate_no: str = None,license_plate_image
     record.save()
     return record
 
+def match_license_plate(record):
+    record_license_plate=record.licenseplate_no 
+
+    matching_vehicles=Vehicle.objects.filter(licenseplate_no=record_license_plate)
+
+    if matching_vehicles.exists():
+        for vehicle in matching_vehicles:
+            print(f"Speeding Vehicle Owner:{vehicle.owner_name} \n Contact Number:{vehicle.contact_number}")
+            # send_sms(vehicle.contact_number)
 
 def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
     # Convert OpenCV BGR to RGB

@@ -35,17 +35,18 @@ media/plate_photos/*
 !media/plate_photos/.gitkeep
 media/result_videos/*
 !media/result_videos/.gitkeep
-models/*
-!models/.gitkeep
-!models/Number_plate_recognize_last.pt
-!models/Vehicle_Detection.pt
-!models/coco.txt
-
+speeding_vehicles/
+Plate_photo/
+License_plate_images/
+licenseplates/
+Vehicle_images/
+TestOcr.py
+ByteTrack/
 # Test Videos and Images
-speed_estimation/Test_video/*
-!speed_estimation/Test_video/.gitkeep
 test_videos/
 test_images/
+Test_Videos/
+output_videos/
 
 # IDE
 .idea/

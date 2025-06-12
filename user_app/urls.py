@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
-
-app_name = 'user_app'
+from django.conf import settings
 
 urlpatterns = [
-    path('', views.welcome, name='welcome'),
-] 
+    path('', views.home, name='home'),
+    # path('records/', views.records, name='records'),
+    path('video_feed/', views.video_feed, name='video_feed'),
+
+]

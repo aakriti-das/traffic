@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 from user_app.models import Record, Station
+from speed_estimation.config import MAC_ADDRESS
 
 def save_record(
     speed: int,
@@ -17,8 +18,12 @@ def save_record(
     if station is None:
         station = Station.objects.first()
     if station is None:
-        raise ValueError("No Station found in the database.")
-
+        station=Station(
+            areacode=23,
+            location="Baneshwor",
+            mac_address=MAC_ADDRESS
+        )
+        station.save()
     record = Record(
         stationID=station,
         speed=speed,
@@ -51,6 +56,7 @@ def save_record(
 def update_record(record_id: int,licenseplate_no: str = None,license_plate_image_np: any = None):
     try:
         record = Record.objects.get(id=record_id)
+        print("Record:",record)
     except Record.DoesNotExist:
         raise ValueError(f"No record found with id {record_id}")
     if licenseplate_no:

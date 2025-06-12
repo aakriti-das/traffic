@@ -5,3 +5,4 @@ classifier_model_path='models/classifier_model.pth'
 speed_limit=1
 # Common vehicle class names in COCO
 VEHICLE_CLASSES = ['car', 'truck', 'bus', 'motorbike', 'motorcycle']
+MAC_ADDRESS = '8c:aa:ce:51:67:e9'

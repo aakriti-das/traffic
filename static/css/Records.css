@@ -1,4 +1,3 @@
-
 body {
     font-family: Arial, sans-serif;
     background-image: linear-gradient(to right, #b6fbff, #83a4d4);
@@ -15,7 +14,8 @@ table {
     overflow: hidden;
 }
 
-th, td {
+th,
+td {
     padding: 15px;
     text-align: center;
     border: 1px solid rgb(117, 103, 103);
@@ -40,10 +40,10 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-     background: linear-gradient(90deg, #ff7e5f, #feb47b);
-  color: #ffffff;
-  border: none;
-  transition: background 0.3s;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    color: #ffffff;
+    border: none;
+    transition: background 0.3s;
 }
 
 caption {
@@ -120,4 +120,52 @@ caption {
 
 .download-btn:hover {
     background-color: #45a049;
+}
+
+.pagination-btn {
+    background-color: #5162b9;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 0 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pagination-btn:hover {
+    background-color: #3d4a8c;
+}
+
+.pagination-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.exceeding-speed {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+/* Update table footer for pagination */
+.table-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 0;
+    gap: 10px;
+}
+
+/* Add loading state */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Responsive adjustments for pagination */
+@media (max-width: 768px) {
+    .pagination-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
 }

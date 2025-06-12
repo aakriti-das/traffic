@@ -58,6 +58,7 @@
                     <span>Station Location: Balkumari</span>
                 </div>
                 <div class="actions">
+                    
                     <button class="action-btn">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge">1</span>
@@ -76,12 +77,12 @@
                         <div class="stream-status">
                             <span class="status-dot"></span>
                             <span>Live</span>
-                            <img src="{% url 'video_feed' %}" width="640" height="480">
                         </div>
                     </div>
                     <div class="video-container">
                         <div class="video-wrapper">
-                            <img id="video-stream" src="" alt="Video Stream">
+                            <!-- <img id="video-stream" src="" alt="Video Stream"> -->
+                        <img src="{% url 'video_feed' %}" height="500">
                             <div id="video-error" class="video-error" style="display: none;">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>Error loading video stream</span>

@@ -17,7 +17,7 @@ class Record(models.Model):
     count = models.IntegerField()
     licenseplate_no = models.CharField(max_length=50, null=True)
     vehicle_image = models.ImageField(upload_to='Vehicle_images/', default=None, null=True, blank=True)
-    license_plate_image = models.ImageField(upload_to='License_plate_images/', default=None, null=True, blank=True)
+    license_plate_image = models.ImageField(upload_to='License_plate_images/', default='test_images/licenseplate_0_0.jpg', null=True, blank=True)
 
     def __str__(self):
         return f"Record from {self.stationID}"

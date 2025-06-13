@@ -1,121 +1,188 @@
-let videoStream = false;
+let videoStream = null;
 let statsInterval = null;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 let isManuallyStopped = false;
 
+
 // DOM Elements
-const $ = id => document.getElementById(id);
-const video = $('video-stream');
-const errorBox = $('video-error');
-const loader = $('loading-indicator');
-const startBtn = document.querySelector('.start-camera');
-const stopBtn = document.querySelector('.stop-camera');
+const videoElement = document.getElementById('video-stream');
+const errorElement = document.getElementById('video-error');
+const loadingElement = document.getElementById('loading-indicator');
+const startButton = document.querySelector('.start-camera');
+const stopButton = document.querySelector('.stop-camera');
 const statusDot = document.querySelector('.status-dot');
-const vehicleCount = $('vehicle-count');
-const currentSpeed = $('current-speed');
 
-const show = el => el && (el.style.display = 'flex');
-const hide = el => el && (el.style.display = 'none');
-const resetUI = () => {
-    hide(errorBox);
-    hide(loader);
-};
+function showError() {
+    if (errorElement) errorElement.style.display = 'flex';
+    if (loadingElement) loadingElement.style.display = 'none';
+}
 
-function handleVideoError(e) {
-    console.error('Stream error:', e);
-    if (isManuallyStopped) return;
-    if (++retryCount <= MAX_RETRIES) {
-        console.log(`Retrying (${retryCount}/${MAX_RETRIES})...`);
+function showLoading() {
+    if (errorElement) errorElement.style.display = 'none';
+    if (loadingElement) loadingElement.style.display = 'flex';
+}
+
+function hideLoadingAndError() {
+    if (errorElement) errorElement.style.display = 'none';
+    if (loadingElement) loadingElement.style.display = 'none';
+}
+
+function handleVideoError(event) {
+
+    console.error('Video stream error:', event);
+    if (isManuallyStopped) {
+        console.log('Video error ignored because camera was manually stopped.');
+        return;
+    }
+    if (retryCount < MAX_RETRIES) {
+        retryCount++;
+        console.log(`Retrying video stream (${retryCount}/${MAX_RETRIES})...`);
         setTimeout(startCamera, 1000);
     } else {
-        show(errorBox);
+        showError();
         stopCamera();
     }
 }
 
 function handleVideoLoad() {
-    console.log('Stream loaded');
-    resetUI();
+    console.log('Video stream loaded successfully');
+    hideLoadingAndError();
     retryCount = 0;
 }
 
 function startCamera() {
-    if (videoStream) return;
+    if (!videoStream) {
+        showLoading();
+        isManuallyStopped = false; // reset flag on start   
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        if (videoElement) {
+            videoElement.src = `/video_feed/?t=${Date.now()}`;
+            videoStream = true;
+        }
 
-    show(loader);
-    isManuallyStopped = false;
-    video.src = `/video_feed/?t=${Date.now()}`;
-    videoStream = true;
+        // Update UI
+        if (startButton) startButton.disabled = true;
+        if (stopButton) stopButton.disabled = false;
+        if (statusDot) statusDot.style.backgroundColor = 'var(--success-color)';
 
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    statusDot.style.backgroundColor = 'var(--success-color)';
-
-    statsInterval = statsInterval || setInterval(updateStats, 5000);
+        // Start stats updates
+        if (!statsInterval) {
+            statsInterval = setInterval(updateStats, 2000);
+        }
+    }
 }
 
 function stopCamera() {
-    if (!videoStream) return;
+    if (videoStream) {
+        isManuallyStopped = true; // indicate manual stop
+        if (videoElement) {
+            videoElement.src = '';
+            videoElement.removeAttribute('src');
+            videoElement.load(); // Optional cleanup
+        }
+        videoStream = false;
 
-    isManuallyStopped = true;
-    video.removeAttribute('src');
-    video.load();
-    videoStream = false;
+        // Update UI
+        if (startButton) startButton.disabled = false;
+        if (stopButton) stopButton.disabled = true;
+        if (statusDot) statusDot.style.backgroundColor = 'var(--danger-color)';
 
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    statusDot.style.backgroundColor = 'var(--danger-color)';
-    vehicleCount.textContent = '0';
-    currentSpeed.textContent = '0';
+        // Reset stats and clear interval
+        const vehicleCount = document.getElementById('vehicle-count');
+        const currentSpeed = document.getElementById('current-speed');
+        if (vehicleCount) vehicleCount.textContent = '0';
+        if (currentSpeed) currentSpeed.textContent = '0';
 
-    clearInterval(statsInterval);
-    statsInterval = null;
-    resetUI();
-    retryCount = 0;
+        if (statsInterval) {
+            clearInterval(statsInterval);
+            statsInterval = null;
+        }
+
+        hideLoadingAndError();
+        retryCount = 0;
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing...');
-    stopBtn.disabled = true;
-    statusDot.style.backgroundColor = 'var(--danger-color)';
-    resetUI();
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('Initializing video stream components...');
 
-    video.addEventListener('error', handleVideoError);
-    video.addEventListener('load', handleVideoLoad);
-    startBtn.addEventListener('click', startCamera);
-    stopBtn.addEventListener('click', stopCamera);
+    // Initialize button states
+    if (stopButton) stopButton.disabled = true;
+    if (statusDot) statusDot.style.backgroundColor = 'var(--danger-color)';
+    hideLoadingAndError();
+
+    // Add event listeners
+    if (videoElement) {
+        videoElement.addEventListener('error', handleVideoError);
+        videoElement.addEventListener('load', handleVideoLoad);
+    }
+
+    if (startButton) {
+        startButton.addEventListener('click', startCamera);
+    }
+
+    if (stopButton) {
+        stopButton.addEventListener('click', stopCamera);
+    }
+
+    // Automatically start the video stream
+    setTimeout(() => {
+        startCamera();
+        console.log('Auto-starting video stream...');
+    }, 500); // Small delay to ensure everything is initialized
 });
 
-// CSRF token fetcher
-const getCSRF = () => {
-    const match = document.cookie.match(/csrftoken=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : '';
-};
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
-// Periodic stats update
+// Update stats periodically
 async function updateStats() {
     if (!videoStream) return;
 
     try {
-        const res = await fetch('/speed_estimation/get_stats/', {
+        const response = await fetch('/speed_estimation/get_stats/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCSRF(),
+                'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: '{}'
+            body: JSON.stringify({})
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        vehicleCount.textContent = data.vehicle_count;
-        currentSpeed.textContent = data.current_speed;
-    } catch (err) {
-        console.error('Stats update failed:', err);
-        if (/Failed to fetch|NetworkError/.test(err.message)) stopCamera();
+        const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        const vehicleCount = document.getElementById('vehicle-count');
+        const currentSpeed = document.getElementById('current-speed');
+        if (vehicleCount) vehicleCount.textContent = data.vehicle_count;
+        if (currentSpeed) currentSpeed.textContent = data.current_speed;
+    } catch (error) {
+        console.error('Error updating stats:', error);
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            stopCamera();
+        }
     }
 }

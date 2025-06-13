@@ -22,10 +22,15 @@ def home(request):
     record_list = Record.objects.all()
     return render(request, 'base.html', {'record_list': record_list})
 
-@ensure_csrf_cookie
-def records(request):
-    record_list = Record.objects.all()
-    return render(request, 'records.html', {'record_list': record_list})
+
+def Records(request):
+    if not request.user.is_authenticated:
+        return redirect('welcome_page')
+    Record_list = Record.objects.all()
+    context = {
+        'Record_list': Record_list
+    }
+    return render(request, 'Records.html', context)
 
 def video_feed(request):
     """
@@ -40,45 +45,11 @@ class RecordPagination(PageNumberPagination):
 
 @api_view(['GET'])
 def get_records(request):
-    try:
-        # Check authentication
-        if not request.user.is_authenticated:
-            return Response(
-                {'error': 'Authentication required'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        # Try to get cached records
-        cache_key = f'records_page_{request.GET.get("page", 1)}'
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
-
-        # Get records and paginate
-        records = Record.objects.all().order_by('-date')
-        paginator = RecordPagination()
-        paginated_records = paginator.paginate_queryset(records, request)
-        
-        # Serialize data
-        serializer = RecordSerializer(paginated_records, many=True, context={'request': request})
-        response_data = {
-            'results': serializer.data,
-            'count': records.count(),
-            'next': paginator.get_next_link(),
-            'previous': paginator.get_previous_link()
-        }
-
-        # Cache the response for 5 seconds
-        cache.set(cache_key, response_data, 5)
-
-        return Response(response_data)
-
-    except Exception as e:
-        return Response(
-            {'error': str(e)}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
+    if not request.user.is_authenticated:
+        return redirect('welcome_page')
+    records = Record.objects.all()
+    serializer = RecordSerializer(records, many=True, context={'request': request})
+    return Response(serializer.data)
 def download_csv(request):
     """
     View for downloading records as CSV file.

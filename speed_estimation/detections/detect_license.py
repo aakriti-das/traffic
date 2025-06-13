@@ -9,9 +9,10 @@ model = YOLO(license_detection_model_path)
 
 save_dir ="licenseplates"  # Directory to save cropped license plates
 
-def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
-    #apply license detection model on recieved image
-    results = model(vehicle_crop)
+def detect_license_plate(frame,record,  prefix="licenseplate"):
+    #cv2.imshow('Input Frame', frame)  # Display the input frame
+    #cv2.waitKey(1)  # Wait for a short time to allow the frame to be displayed
+    results = model(frame)
     detections = []
     for idx, result in enumerate(results):
         for box_num, box in enumerate(result.boxes):
@@ -21,10 +22,10 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
                     'bbox': (x1, y1, x2, y2),
                     'confidence': box.conf.item()
                 })
-                # Draw bounding box on the vehicle_crop
-                cv2.rectangle(vehicle_crop, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                # Draw bounding box on the frame
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(
-                    vehicle_crop,
+                    frame,
                     f"{box.conf.item():.2f}",
                     (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX,
@@ -35,7 +36,7 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
                 # Save cropped license plate if save_dir is provided
                 if save_dir is not None:
                     os.makedirs(save_dir, exist_ok=True)
-                    crop = vehicle_crop[y1:y2, x1:x2]
+                    crop = frame[y1:y2, x1:x2]
                     if crop.size > 0:
                         filename = os.path.join(save_dir, f"{prefix}_{idx}_{box_num}.jpg")
                         cv2.imwrite(filename, crop)

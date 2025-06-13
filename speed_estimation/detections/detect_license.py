@@ -10,8 +10,8 @@ model = YOLO(license_detection_model_path)
 save_dir ="licenseplates"  # Directory to save cropped license plates
 
 def detect_license_plate(frame,record,  prefix="licenseplate"):
-    cv2.imshow('Input Frame', frame)  # Display the input frame
-    cv2.waitKey(1)  # Wait for a short time to allow the frame to be displayed
+    #cv2.imshow('Input Frame', frame)  # Display the input frame
+    #cv2.waitKey(1)  # Wait for a short time to allow the frame to be displayed
     results = model(frame)
     detections = []
     for idx, result in enumerate(results):

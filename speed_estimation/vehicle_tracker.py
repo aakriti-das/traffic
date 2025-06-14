@@ -64,8 +64,8 @@ def track_vehicles(frame: np.ndarray, detections: sv.Detections, fps) -> tuple[n
                     filename = f"{SPEEDING_DIR}/vehicle_{tracker_id}_{int(speed)}.jpg"
                     cv2.imwrite(filename, crop)
                     print(f"Saved speeding vehicle crop to {filename}")
-                    cv2.imshow('Speeding Vehicle', crop)
-                    cv2.waitKey(1)
+                    #cv2.imshow('Speeding Vehicle', crop)
+                    #cv2.waitKey(1)
                     record=save_record(speed, 1, filename)  # Pass the filename, not the crop array
                     license_detections = detect_license_plate(crop,record)
                     saved_tracker_ids.add(tracker_id)  # Mark as saved

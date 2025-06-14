@@ -1,74 +1,78 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    body{
-    background-color: black
-    ink;
-    }
+    <title>Station Login</title>
+    <!-- <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            padding-top: 100px;
+        }
 
-    .gif {
-      
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 95vh;
-        margin: 0;
-        padding: 0;
-    }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            width: 300px;
+        }
 
-    .gif-image{
-        position: fixed;
-        max-width:60%;
-        max-height: 120%;
-    }
- 
-    .shadow__btn {
-        position: fixed;
-        margin: 200px -200px -100px -80px;
-        justify-items: left;
-        padding: 10px 20px;
-        border: none;
-        font-size: 17px;
-        color: #fff;
-        border-radius: 7px;
-        letter-spacing: 4px;
-        font-weight: 700;
-        text-transform: uppercase;
-        transition: 0.5s;
-        transition-property: box-shadow;
-    }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .shadow__btn {
-        background: rgb(0,140,255);
-        box-shadow: 0 0 25px rgb(0,140,255);
-    }
+        .login-box form input[type="text"],
+        .login-box form input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
 
-    .shadow__btn:hover {
-        box-shadow: 0 0 5px rgb(0,140,255),
-                    0 0 25px rgb(0,140,255),
-                    0 0 50px rgb(0,140,255),
-                    0 0 100px rgb(0,140,255);
-    }
+        .login-box button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-  </style>
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+    </style> -->
+     <title>Station Sign Up / Sign In</title>
+  <link rel="stylesheet" href="{% static 'css/StationRegister.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="gif">
-    <!-- Replace "animation.gif" with the URL or path to your GIF file -->
-    <img class="gif-image" src="../static\animation.gif" alt="Animated GIF">
-    <div >
-      <form method="POST">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button type="submit" class="shadow__btn",>
-            Get Started
-        </button>
-      </form>
-        <div>{{ error }}</div>
-      
-
+      <!-- Header -->
+  <header class="page-header">
+    <i class="fas fa-traffic-light"></i>
+    <span>TraffiSight</span>
+  </header>
+    <div class="login-box">
+        <h2>Station Login</h2>
+        {% if error_message %}
+            <div class="error">{{ error_message }}</div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Login</button>
+            <a href="/station-register">Register Station</a>
+        </form>
     </div>
-  </div>
 </body>
 </html>

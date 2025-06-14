@@ -1,6 +1,7 @@
+{% load static %}
 <html>
   <head>
-    <link rel="stylesheet" href="../static/css/Records.css" />
+<link rel="stylesheet" href="{% static 'css/Records.css' %}" />
   </head>
   <body>
     <div class="search-container">
@@ -14,7 +15,7 @@
         id="searchOption"
         style="
           background-color: #f2f2f2;
-          color: #333;
+          color: #0f42af;
           font-size: 13px;
           padding: 4px;
           border-radius: 6px;
@@ -32,20 +33,19 @@
     <table id="myTable">
       <tr>
         <th>SN</th>
-        <th>licenseplate no</th>
         <th>Speed</th>
         <th>limit</th>
         <th>Date</th>
         <th>Vehicle Photo</th>
         <th>License Plate photo</th>
+        <th>licenseplate no</th>
       </tr>
 
       {% for Record in Record_list %}
       <tr>
-        <td>{{Record.pk}}</td>
-        <td>{{Record.licenseplate_no}}</td>
+        <td>{{forloop.counter}}</td>
         <td>{{Record.speed}}</td>
-        <td>50</td>
+        <td>{{Record.stationID.speed_limit}}</td>
         <td class="date-column">{{Record.date|date:"d/m/Y"}}</td>
         <td>
           <img
@@ -53,13 +53,14 @@
           />
         </td>
         <td>
-          <img
-            src="{{Record.license_plate_image.url }}"
-            alt="License Image"
-            width="100"
-            heigth="100"
-          />
+       {% if Record.license_plate_image %}
+          <img src="{{ Record.license_plate_image.url }}" alt="License Image" width="100" height="100" />
+        {% else %}
+          Failed to detect license
+        {% endif %}
         </td>
+      <td>{{Record.licenseplate_no}}</td>
+
       </tr>
 
       {% endfor %}
@@ -86,14 +87,14 @@
     const rows = table.getElementsByTagName("tr");
 
     for (let i = 1; i < rows.length; i++) {
-      const limitCell = rows[i].getElementsByTagName("td")[3];
-      const speedCell = rows[i].getElementsByTagName("td")[2];
+      const limitCell = rows[i].getElementsByTagName("td")[2];
+      const speedCell = rows[i].getElementsByTagName("td")[1];
 
       const limit = parseInt(limitCell.innerText);
       const speed = parseInt(speedCell.innerText);
 
       if (speed > limit) {
-        speedCell.style.backgroundColor = "red";
+        speedCell.style.backgroundColor = "orange";
       }
     }
   });

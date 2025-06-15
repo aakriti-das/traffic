@@ -7,4 +7,4 @@ speed_limit=1
 VEHICLE_CLASSES = ['car', 'truck', 'bus', 'motorbike', 'motorcycle']
 MAC_ADDRESS = '8c:aa:ce:51:67:e9'
 
-video_path="Test_Videos/aakashePul.mp4"
+video_path="Test_Videos/car.mp4"

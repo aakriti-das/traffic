@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Station Sign Up / Sign In</title>
+  <link rel="stylesheet" href="{% static 'css/StationRegister.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="page-header">
+    <i class="fas fa-traffic-light"></i>
+    <span>TraffiSight</span>
+  </header>
+
+  <h2>Station Registration</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div style="max-width: 400px;">
+      {{ form.as_p }}
+    </div>
+    <button type="submit">Register Station</button>
+  </form>
+
+</body>
+</html>

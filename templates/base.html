@@ -15,7 +15,7 @@
 <body>
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" style="position: fixed;">
             <div class="sidebar-header">
                 <i class="fas fa-traffic-light"></i>
                 <h1>TraffiSight</h1>
@@ -33,20 +33,26 @@
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item"> 
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </a>
             </nav>
+
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Admin</span>
+                    <i class="fas fa-user-circle"></i>  
+                    {{station.location}}
                 </div>
-                
+        <a href="{% url 'station_logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Logout
+            </a>
+
+            <form id="logout-form" method="post" action="{% url 'station_logout' %}" style="display: none;">
+                    {% csrf_token %}
+                </form>
             </div>
         </aside>
-
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-bar">
@@ -55,7 +61,7 @@
                 </div>
                 <div class="location-info">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>Station Location: Balkumari</span>
+                    <span>Station Location: {{station.location}} </span>
                 </div>
                 <div class="actions">
                     
@@ -92,7 +98,7 @@
                                 <span>Loading video stream...</span>
                             </div>
                         </div>
-                        <div class="video-overlay">
+                        <!-- <div class="video-overlay">
                             <div class="stream-info">
                                 <div class="info-item">
                                     <i class="fas fa-car"></i>
@@ -103,7 +109,7 @@
                                     <span>Speed: <strong id="current-speed">0</strong> km/h</span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="video-controls">
                         <form method="post" class="control-form">
@@ -157,13 +163,13 @@
                         </table>
                     </div>
                     <div class="table-footer">
-                        <button class="view-all-btn">View All Records</button>
+                        <a href="/Records"><button class="view-all-btn">View All Records</button></a>
                     </div>
                 </section>
             </div>
         </main>
     </div>
-
+   
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function getCookie(name) {

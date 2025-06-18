@@ -29,11 +29,11 @@
                     <i class="fas fa-table"></i>
                     <span>Records</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="/traffic/templates/welcome_dashboard.html" class="nav-item">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
-                <a href="#" class="nav-item"> 
+                <a href="#" class="nav-item">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </a>
@@ -41,14 +41,15 @@
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <i class="fas fa-user-circle"></i>  
+                    <i class="fas fa-user-circle"></i>
                     {{station.location}}
                 </div>
-        <a href="{% url 'station_logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <a href="{% url 'station_logout' %}"
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Logout
-            </a>
+                </a>
 
-            <form id="logout-form" method="post" action="{% url 'station_logout' %}" style="display: none;">
+                <form id="logout-form" method="post" action="{% url 'station_logout' %}" style="display: none;">
                     {% csrf_token %}
                 </form>
             </div>
@@ -64,7 +65,7 @@
                     <span>Station Location: {{station.location}} </span>
                 </div>
                 <div class="actions">
-                    
+
                     <button class="action-btn">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge">1</span>
@@ -88,7 +89,7 @@
                     <div class="video-container">
                         <div class="video-wrapper">
                             <img id="video-stream" src="" alt="Video Stream">
-                        <!-- <img src="{% url 'video_feed' %}" height="500"> -->
+                            <!-- <img src="{% url 'video_feed' %}" height="500"> -->
                             <div id="video-error" class="video-error" style="display: none;">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>Error loading video stream</span>
@@ -169,7 +170,7 @@
             </div>
         </main>
     </div>
-   
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function getCookie(name) {

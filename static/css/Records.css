@@ -1,8 +1,116 @@
+:root {
+    --primary-color: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --secondary-color: #64748b;
+    --success-color: #008000;
+    --danger-color: #c72c2c;
+    --warning-color: #f59e0b;
+    --background-color: #f8fafc;
+    --surface-color: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --sidebar-width: 280px;
+    --header-height: 70px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
 body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9f9f9;
-    margin: 30px;
-    color: #333;
+
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout */
+.app-container {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    min-height: 100vh;
+
+}
+
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    position: fixed;
+    width: var(--sidebar-width);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.sidebar-header i {
+    font-size: 3rem;
+    color: var(--primary-color);
+}
+
+.sidebar-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Edu SA Hand';
+}
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.nav-item:hover {
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    color: #ffffff;
+    border: none;
+    transition: background 0.7s;
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    color: #ffffff;
+    border: none;
+    transition: background 0.3s;
+    box-shadow: var(--shadow-md);
+}
+
+.nav-item i {
+    font-size: 1.25rem;
+}
+
+.sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
 }
 
 .search-container {
@@ -23,10 +131,11 @@ body {
 
 #searchOption {
     margin-left: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid;
     border-radius: 6px;
     padding: 8px 10px;
-    font-size: 14px;
+    font-size: 20px;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
 }
 
 table {
@@ -46,7 +155,7 @@ td {
 }
 
 th {
-    background-color: #007bff;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
     color: white;
     font-size: 14px;
 }
@@ -56,7 +165,8 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-    background-color: #e9f5ff;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    ;
 }
 
 img {
@@ -66,18 +176,21 @@ img {
 
 .download-btn {
     display: inline-block;
-    padding: 8px 16px;
-    background-color: #1487da;
-    color: white;
+    margin-left: 10px;
+    padding: 1px 5px;
+    border: 1px solid;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    color: black;
     text-decoration: none;
-    font-size: 14px;
-    border-radius: 5px;
-    margin-top: 10px;
-    transition: background-color 0.3s;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: 0.3s;
+    font-weight: 500;
+    width: 160px;
 }
 
 .download-btn:hover {
-    background-color: #218838;
+    background-color: #feb47b;
 }
 
 #notFoundMessage {

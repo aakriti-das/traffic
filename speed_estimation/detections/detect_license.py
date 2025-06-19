@@ -41,8 +41,8 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
                         filename = os.path.join(save_dir, f"{prefix}_{idx}_{box_num}.jpg")
                         cv2.imwrite(filename, crop)
                         # print(f"Saved license plate crop to {filename}")
-                        cv2.imshow('Cropped License Plate', crop)  # Display the cropped license plate
-                        cv2.waitKey(1)
+                        # cv2.imshow('Cropped License Plate', crop)  # Display the cropped license plate
+                        # cv2.waitKey(1)
                         record=update_record(record.id,None,crop)
                         license_text = read_license_plate(crop)
                         record=update_record(record.id,license_text,None)

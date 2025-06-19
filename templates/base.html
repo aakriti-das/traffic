@@ -88,7 +88,8 @@
                     </div>
                     <div class="video-container">
                         <div class="video-wrapper">
-                            <img id="video-stream" src="" alt="Video Stream">
+                            <img id="video-stream" data-url="{% url 'video_feed' %}" alt="Video Stream">
+
                             <!-- <img src="{% url 'video_feed' %}" height="500"> -->
                             <div id="video-error" class="video-error" style="display: none;">
                                 <i class="fas fa-exclamation-circle"></i>

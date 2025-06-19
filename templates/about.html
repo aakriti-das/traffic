@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us</title>
+  <link rel="stylesheet" href="../static/css/base.css" />
+  <link rel="stylesheet" href="../static/css/about.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+
+  <aside class="sidebar" style="position: fixed;">
+    <div class="sidebar-header">
+      <i class="fas fa-traffic-light"></i>
+      <h1>TraffiSight</h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">
+        <i class="fas fa-video"></i>
+        <span>Live Feed</span>
+      </a>
+      <a href="/Records" class="nav-item">
+        <i class="fas fa-table"></i>
+        <span>Records</span>
+      </a>
+      <a href="/about" class="nav-item">
+        <i class="fas fa-chart-bar"></i>
+        <span>About Us</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <i class="fas fa-user-circle"></i>
+        {{station.location}}
+      </div>
+      <a href="{% url 'station_logout' %}"
+        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        Logout
+      </a>
+
+      <form id="logout-form" method="post" action="{% url 'station_logout' %}" style="display: none;">
+        {% csrf_token %}
+      </form>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="content">
+      <h1 style="text-align: center; color: #fb7756;">About Us</h1>
+      <p style="text-align: center; color: #64748b;">
+        Welcome to <strong>TraffiSight</strong> — your trusted traffic monitoring solution.
+      </p>
+
+      <h2>Our Mission</h2>
+      <p>
+        At TraffiSight, we aim to make traffic monitoring smarter, safer, and more efficient.
+        Our system estimates vehicle speeds and automatically recognizes number plates. If over-speeding is detected,
+        we notify the rider via email with the fine details — encouraging safer driving.
+      </p>
+
+      <h2>What We Do</h2>
+      <ul>
+        <li><strong>Real-Time Monitoring:</strong> Live traffic feeds and instant speed detection.</li>
+        <li><strong>Automated Enforcement:</strong> Number plate recognition and automatic fine notifications by email.
+        </li>
+        <li><strong>Data & Analytics:</strong> Detailed records and accident trend analysis for better traffic
+          management.
+        </li>
+      </ul>
+
+      <h2>Accident Statistics</h2>
+      <p>
+        Over-speeding is a major cause of road accidents globally:
+      </p>
+      <ul>
+  <li>Speeding remains one of the top causes of road accidents in Nepal, particularly on highways and hilly terrains 
+    (<a href="https://nepalpolice.gov.np" target="_blank">Nepal Police</a>).</li>
+
+  <li>According to the <a href="https://traffic.nepalpolice.gov.np/" target="_blank">Nepal Traffic Police</a>, 
+    over <strong>30% of serious road accidents</strong> are attributed to over-speeding and reckless driving.</li>
+
+  <li>In the fiscal year 2022/23, Nepal recorded over <strong>2,700 road traffic deaths</strong>, 
+    with speeding identified as a major contributing factor 
+    (<a href="https://kathmandupost.com/national/2023/07/25/road-accidents-killed-more-than-2-700-people-last-fiscal-year" target="_blank">The Kathmandu Post</a>).</li>
+
+  <li>Speeding-related crashes are more prevalent during <strong>festive seasons</strong> and in areas lacking speed monitoring 
+    (<a href="https://english.onlinekhabar.com/road-accidents-rise-festive-season.html" target="_blank">OnlineKhabar</a>).</li>
+
+  <li>The government has started installing <strong>CCTV and speed-monitoring systems</strong> in major cities and highways 
+    to reduce over-speeding 
+    (<a href="https://myrepublica.nagariknetwork.com/news/traffic-police-to-install-cctvs-on-highways/" target="_blank">MyRepublica</a>).</li>
+</ul>
+
+      <p>
+        TraffiSight helps reduce these numbers through advanced detection and real-time reporting.
+      </p>
+
+      <h2>Contact Us</h2>
+      <p>
+        Have questions? Feel free to reach out at
+        <a href="mailto:contact@traffisight.com">contact@traffisight.com</a>.
+      </p>
+    </div>
+
+    <div class="vehicle-images">
+      <h3>Vehicle Detections</h3>
+      <div class="image-gallery">
+        <img src="https://www.avidbeam.com/wp-content/uploads/2024/11/How-Vehicle-Detection-Systems-Are-Revolutionizing-Road-Safety-1.webp"
+          alt="Detected Vehicle 1">
+        <img src="https://kotaielectronics.com/wp-content/uploads/2024/07/61Kph-1024x683.png" alt="Detected Vehicle 2">
+        <img src="https://nepalinerd.com/wp-content/uploads/2023/01/Traffic-Rules-and-Fines-in-Nepal-2023.webp" alt="Detected Vehicle 3">
+      </div>
+    </div>
+  </main>
+
+
+</body>

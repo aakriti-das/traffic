@@ -1,0 +1,81 @@
+/* About Us Page Styles */
+.main-content {
+  display: flex;
+  gap: 10px;
+}
+
+div.content {
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
+  color: #334155;
+  
+}
+
+div.content h1 {
+  font-size: 2.5rem;
+  color: #fb7756;
+  margin-bottom: 0.5rem;
+}
+
+div.content p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+div.content h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+
+div.content ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.about-container {
+  display: flex;
+  gap: 40px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.about-content {
+  flex: 2;
+  min-width: 300px;
+}
+
+.vehicle-images {
+  flex: 1;
+  min-width: 250px;
+
+}
+
+.vehicle-images h3 {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  margin-top: 70px;
+  color: #fb7756;
+}
+
+.image-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* .image-gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  box-shadow: 0 4px 5px rgba(0,0,0,0.3);
+  object-fit: cover;
+} */

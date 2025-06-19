@@ -1,11 +1,10 @@
 from django.core.files import File
 from django.utils import timezone
-import cv2
+import cv2,uuid
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 from user_app.models import Record, Station,Vehicle
-from speed_estimation.config import MAC_ADDRESS
 
 def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_image_path: str = None,licenseplate_no: str = None,station: Station = None):
     if station is None:
@@ -14,7 +13,7 @@ def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_imag
         station=Station(
             areacode=23,
             location="Baneshwor",
-            mac_address=MAC_ADDRESS
+            mac_address=get_mac_address()
         )
         station.save()
     record = Record(
@@ -42,7 +41,6 @@ def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_imag
                 File(f),
                 save=False
             )
-
     record.save()
     return record
 
@@ -69,8 +67,11 @@ def match_license_plate(record):
 
     if matching_vehicles.exists():
         for vehicle in matching_vehicles:
+            vehicle.violation_count+=1
+            vehicle.save()
             print(f"Speeding Vehicle Owner:{vehicle.owner_name} \n Contact Number:{vehicle.contact_number}")
-            # send_sms(vehicle.contact_number)
+            print(f"Overspeeded for {vehicle.violation_count}th time")
+            # send_sms(vehicle.contact_number)x 
 
 def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
     # Convert OpenCV BGR to RGB
@@ -84,3 +85,19 @@ def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
     image_file = ContentFile(buffer.getvalue(), name=filename)
 
     return image_file
+
+def get_mac_address():
+    mac = uuid.getnode()
+    return ':'.join(['{:02x}'.format((mac >> ele) & 0xff)
+                    for ele in range(0, 8 * 6, 8)][::-1])
+
+def get_speed_limit():
+    try:
+        mac_address=get_mac_address()
+        station=Station.objects.get(mac_address=mac_address)
+        return station.speed_limit
+    except:
+        return 30.0
+
+
+    

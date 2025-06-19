@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from speed_estimation import views
 
 urlpatterns = [
-     path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('speed_estimation/get_stats/', views.dummy_get_stats, name='get_stats'),
     path('', include('user_app.urls')),
 ]

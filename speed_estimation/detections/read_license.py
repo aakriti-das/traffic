@@ -31,7 +31,6 @@ class CharClassifier(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-
 def read_license_plate(image_input):
     print("Inside read_license_plate function")
     # Accept both file path and numpy array

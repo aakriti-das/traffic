@@ -16,6 +16,7 @@ class Record(models.Model):
     speed = models.IntegerField()
     date = models.DateField()
     count = models.IntegerField()
+    # speed_limit=models.IntegerField()
     licenseplate_no = models.CharField(max_length=50, null=True)
     vehicle_image = models.ImageField(upload_to='Vehicle_images/', default=None, null=True, blank=True)
     license_plate_image = models.ImageField(upload_to='License_plate_images/', default='test_images/licenseplate_0_0.jpg', null=True, blank=True)
@@ -29,5 +30,5 @@ class Vehicle(models.Model):
     contact_number=models.CharField(max_length=20,null=True)
     violation_count=models.IntegerField(default=0)
 
-    def _str_(self):
+    def __str__(self):
         return f"Vehicle{self.vehicle_id}"

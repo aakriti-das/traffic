@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Record,Station
 from .forms import StationSignUpForm ,StationLoginForm
 from django.http import HttpResponse,StreamingHttpResponse
+from django.contrib import messages
 from django.views.decorators.csrf import ensure_csrf_cookie
 from speed_estimation.main import process_video_stream
 from django.http import JsonResponse
@@ -15,8 +16,7 @@ from rest_framework import status
 from django.core.cache import cache
 from django.conf import settings
 from datetime import timedelta
-import csv
-import uuid
+import csv,uuid
 from datetime import datetime
 from speed_estimation.config import speed_limit
 
@@ -26,7 +26,9 @@ def station_register(request):
         form = StationSignUpForm(request.POST)
         print(form)
         if form.is_valid():
+            location = form.cleaned_data['location']
             form.save()
+            messages.success(request,f"Station:{location} registered successfully")
             return redirect('welcome_dashboard')  # or a success page
     else:
         form = StationSignUpForm(initial={'mac_address':mac_address})
@@ -45,6 +47,7 @@ def welcome_dashboard(request):
                 station = Station.objects.filter(areacode=areacode, mac_address=mac_address).first()
                 if station:
                     request.session['station_id'] = station.id
+                    messages.success(request,f"Station:{station.location} Logged in successfully")
                     return redirect('home')
                 else:
                     error_message = "Invalid credentials. Please try again." 

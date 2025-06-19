@@ -47,6 +47,7 @@ test_videos/
 test_images/
 Test_Videos/
 output_videos/
+Detected_licenseplates/
 
 # IDE
 .idea/

@@ -19,10 +19,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from speed_estimation import views
+from user_app import views as user_views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('speed_estimation/get_stats/', views.dummy_get_stats, name='get_stats'),
+    path('video_feed/', user_views.video_feed, name='video_feed'),
     path('', include('user_app.urls')),
 ]
 # Add static and media file serving for development

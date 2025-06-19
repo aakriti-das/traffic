@@ -58,7 +58,8 @@ function startCamera() {
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
         if (videoElement) {
-            videoElement.src = `/video_feed/?t=${Date.now()}`;
+            videoElement.src = `${videoElement.dataset.url}?t=${Date.now()}`;
+
             videoStream = true;
         }
 

@@ -9,6 +9,7 @@ urlpatterns = [
     path('station-logout/', views.station_logout, name='station_logout'),
     re_path(r'^[Rr]ecords/?$', views.Records, name='Records'),  # Handles both /records/ and /Records/
     path('video_feed/', views.video_feed, name='video_feed'),
+    path('about/',views.about,name='about'),
     path('api/records/', views.get_records, name='get_records'),
     path('download-csv/', views.download_csv, name='download_csv'),
 ]

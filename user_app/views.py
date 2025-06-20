@@ -74,12 +74,18 @@ def home(request):
     return render(request, 'base.html', {'record_list': record_list,'station':station})
 
 def Records(request):
+    station_id = request.session.get('station_id')
     if 'station_id' not in request.session:
+        return redirect('welcome_dashboard')
+    try:
+        station = Station.objects.get(id=station_id)
+    except Station.DoesNotExist:
         return redirect('welcome_dashboard')
     Record_list = Record.objects.all()
     context = {
         'Record_list': Record_list,
-        'speed_limit':speed_limit
+        'speed_limit':speed_limit,
+        'station':station
     }
     return render(request, 'Records.html', context)
 
@@ -98,7 +104,15 @@ def get_records(request):
     records = Record.objects.all()
     serializer = RecordSerializer(records, many=True, context={'request': request})
     return Response(serializer.data)
-
+def about(request):
+    station_id = request.session.get('station_id')
+    if 'station_id' not in request.session:
+        return redirect('welcome_dashboard')
+    try:
+        station = Station.objects.get(id=station_id)
+    except Station.DoesNotExist:
+        return redirect('welcome_dashboard')
+    return render(request,'about.html',{'station':station})
 def download_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="traffic_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'

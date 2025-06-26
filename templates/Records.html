@@ -86,10 +86,10 @@
 
         {% for Record in Record_list %}
         <tr>
-          <td>{{Record.pk}}</td>
+          <td>{{ forloop.counter }}</td>
           <td>{{Record.licenseplate_no}}</td>
           <td>{{Record.speed}}</td>
-          <td>50</td>
+          <td> {{Record.stationID.speed_limit}} </td>
           <td class="date-column">{{Record.date|date:"d/m/Y"}}</td>
           <td>
             <img src="{{Record.vehicle_image.url }}" alt="Vehicle Image" width="200" heigth="200" />

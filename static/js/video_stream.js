@@ -187,3 +187,28 @@ async function updateStats() {
         }
     }
 }
+
+// Same bell icon click logic
+bellButton.addEventListener('click', async function () {
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+
+    const response = await fetch('/notifications/');
+    const data = await response.json();
+    const alerts = data.alerts || [];
+
+    list.innerHTML = '';
+    if (alerts.length > 0) {
+        alerts.forEach(alert => {
+            const li = document.createElement('li');
+            li.textContent = alert.message;
+            li.classList.add('alert-item', `alert-${alert.type}`);
+            list.appendChild(li);
+        });
+
+        badge.style.display = 'inline-block';
+        badge.textContent = alerts.length;
+    } else {
+        badge.style.display = 'none';
+    }
+});
+

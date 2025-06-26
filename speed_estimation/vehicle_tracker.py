@@ -25,7 +25,7 @@ os.makedirs(SPEEDING_DIR, exist_ok=True)
 saved_tracker_ids = set()
 plate_memory = {}
 
-def track_vehicles(frame: np.ndarray, detections: sv.Detections, fps) -> tuple[np.ndarray, sv.Detections]:
+def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) -> tuple[np.ndarray, sv.Detections]:
     print("FPS:", fps)
     # Update tracker with the latest detections
     tracked_detections = tracker.update_with_detections(detections)
@@ -81,7 +81,7 @@ def track_vehicles(frame: np.ndarray, detections: sv.Detections, fps) -> tuple[n
                     #cv2.imshow('Speeding Vehicle', crop)
                     #cv2.waitKey(1)
                     record=save_record(speed, 1, filename)  # Pass the filename, not the crop array
-                    license_detections = detect_license_plate(crop,record)
+                    license_detections = detect_license_plate(request,crop,record)
                     if license_detections:
                         crop_height,crop_width=crop.shape[:2]
                         # Assume only one plate per vehicle
@@ -94,6 +94,7 @@ def track_vehicles(frame: np.ndarray, detections: sv.Detections, fps) -> tuple[n
                     }
                     saved_tracker_ids.add(tracker_id)  # Mark as saved
                 # --- Re-draw saved license plate box on current frame ---
+                print(tracker_id)
         if tracker_id in plate_memory:
             rel = plate_memory[tracker_id]["relative_bbox"]
             lx1, ly1, lx2, ly2 = rel

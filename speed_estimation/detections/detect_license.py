@@ -9,7 +9,7 @@ model = YOLO(license_detection_model_path)
 
 save_dir ="Detected_licenseplates"  # Directory to save cropped license plates
 
-def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
+def detect_license_plate(request,vehicle_crop,record,  prefix="licenseplate"):
     results = model(vehicle_crop)
     detections = []
     output = []
@@ -47,7 +47,7 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
                         license_text = read_license_plate(crop)
                         record=update_record(record.id,license_text,None)
                         print(f"Detected license text: {license_text}")
-                        match_license_plate(record)
+                        match_license_plate(request,record)
 
                         # Append bbox and text
                     output.append(((x1, y1, x2, y2), license_text))

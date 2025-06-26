@@ -4,7 +4,7 @@ from speed_estimation.detections.detect_vehicle import detect_vehicle
 from .vehicle_tracker import track_vehicles
 from .config import video_path
 
-def process_video_stream():
+def process_video_stream(request):
     cap = cv2.VideoCapture(video_path)
     # cap = cv2.VideoCapture(0)  # 0 for webcam; replace with IP stream if needed
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -14,7 +14,7 @@ def process_video_stream():
             break
         
         detections, frame = detect_vehicle(frame)
-        annotated_frame, tracked_detections = track_vehicles(frame, detections,fps)
+        annotated_frame, tracked_detections = track_vehicles(request,frame, detections,fps)
 
         # Encode frame as JPEG
         ret, buffer = cv2.imencode('.jpg', annotated_frame)

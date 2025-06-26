@@ -71,7 +71,7 @@ def home(request):
     except Station.DoesNotExist:
         return redirect('welcome_dashboard')
     record_list = Record.objects.all()
-    return render(request, 'base.html', {'record_list': record_list,'station':station})
+    return render(request, 'base.html', {'record_list': record_list,'station':station,})
 
 def Records(request):
     station_id = request.session.get('station_id')
@@ -90,8 +90,12 @@ def Records(request):
     return render(request, 'Records.html', context)
 
 def video_feed(request):
-    return StreamingHttpResponse(process_video_stream(), content_type='multipart/x-mixed-replace; boundary=frame')
+    return StreamingHttpResponse(process_video_stream(request), content_type='multipart/x-mixed-replace; boundary=frame')
 
+def get_notifications(request):
+    alerts = request.session.get('alerts', [])
+    request.session['alerts'] = []  # Clear after fetching
+    return JsonResponse({'alerts': alerts})
 class RecordPagination(PageNumberPagination):
     page_size = 7
     page_size_query_param = 'page_size'

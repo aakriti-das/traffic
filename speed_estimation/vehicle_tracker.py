@@ -7,7 +7,9 @@ from speed_estimation.utils.speed import calculate_speed
 from speed_estimation.utils.nepaliframe import draw_nepali_text_on_frame
 from speed_estimation.config import speed_limit,perspective_matrix
 from speed_estimation.detections.detect_license import detect_license_plate
-from speed_estimation.db.db import save_record
+from speed_estimation.db.db import save_record,update_record,match_license_plate
+from datetime import datetime 
+from speed_estimation.state_manager import vehicle_state
 
 # Initialize ByteTrack tracker and annotators once
 tracker = sv.ByteTrack()
@@ -22,6 +24,8 @@ MAX_HISTORY = 10
 SPEEDING_DIR = "speeding_vehicles"
 os.makedirs(SPEEDING_DIR, exist_ok=True)
 
+save_dir ="Detected_licenseplates"  # Directory to save cropped license plates
+os.makedirs(save_dir, exist_ok=True)
 saved_tracker_ids = set()
 plate_memory = {}
 
@@ -55,18 +59,27 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
         if len(vehicle_positions[tracker_id]) > 1:
             speed = calculate_speed(vehicle_positions[tracker_id], fps)
         else:
-            speed = 0.0
-        
+            speed = 0.0   
         x1i, y1i, x2i, y2i = map(int, [x1, y1, x2, y2])
+        confidence = tracked_detections.confidence[i] if hasattr(tracked_detections, 'confidence') else None
+
+        # Update global state manager
+        vehicle_state.update_vehicle_position(tracker_id, transformed_center, speed, confidence)
+
+        if confidence is not None:
+            conf_text = f"{confidence*100:.2f}"
+        else:
+            conf_text = "N/A"
         # Annotate label and log
         if speed <=speed_limit:
-            label = f"ID {tracker_id} {speed:.1f} km/h"
+            label = f"ID {tracker_id} {speed:.1f} km/h {conf_text}"
         else:
-            label = f"ID {tracker_id} {speed:.1f} km/h Overspeeding"
+            label = f"ID {tracker_id} {speed:.1f} km/h Overspeeding {conf_text}"
         
         labels.append(label)
         print(f"[TRACK] Vehicle ID {tracker_id} | Speed: {speed:.1f} km/h")
 
+        # if speed > 0.1:
         if speed > speed_limit:
             if tracker_id not in saved_tracker_ids:
                 print(f"[ALERT] Vehicle ID {tracker_id} is exceeding the speed limit!")
@@ -75,24 +88,33 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
                     print(f"[WARNING] Invalid crop for vehicle {tracker_id}, skipping.")
                     continue
                 if crop.size > 0:
-                    filename = f"{SPEEDING_DIR}/vehicle_{tracker_id}_{int(speed)}.jpg"
+                    # saved_tracker_ids.add(tracker_id) #To be removed
+                    filename = f"{SPEEDING_DIR}/Vehicle2_{tracker_id}_{int(speed)}.jpg"
                     cv2.imwrite(filename, crop)
                     print(f"Saved speeding vehicle crop to {filename}")
                     #cv2.imshow('Speeding Vehicle', crop)
                     #cv2.waitKey(1)
-                    record=save_record(speed, 1, filename)  # Pass the filename, not the crop array
-                    license_detections = detect_license_plate(request,crop,record)
+                    license_detections = detect_license_plate(request,crop)
+                    # license_detections=None
                     if license_detections:
                         crop_height,crop_width=crop.shape[:2]
                         # Assume only one plate per vehicle
-                        (lx1, ly1, lx2, ly2), plate_text = license_detections[0]
+                        (lx1, ly1, lx2, ly2), plate_text ,license_photo = license_detections[0]
                         relative_bbox = (lx1, ly1, lx2, ly2)
                         plate_memory[tracker_id] = {
                         "relative_bbox": relative_bbox,
                         "plate_text": plate_text,
                         "crop_dims": (crop_width, crop_height)
-                    }
-                    saved_tracker_ids.add(tracker_id)  # Mark as saved
+                                   }
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")  
+                        platefilename = os.path.join(save_dir, f"LicensePlate_{timestamp}.jpg")
+                        cv2.imwrite(platefilename, license_photo)
+                        record=save_record(speed, 1, filename,platefilename)
+                        saved_tracker_ids.add(tracker_id)  # Mark as saved
+                        if plate_text is not None:
+                            record=update_record(record.id,plate_text,None)
+                            print(f"Detected license text: {plate_text}")
+                            match_license_plate(request,record)
                 # --- Re-draw saved license plate box on current frame ---
                 print(tracker_id)
         if tracker_id in plate_memory:
@@ -129,5 +151,4 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
     annotated_frame = label_annotator.annotate(
         scene=annotated_frame, detections=tracked_detections, labels=labels
     )
-
     return annotated_frame, tracked_detections

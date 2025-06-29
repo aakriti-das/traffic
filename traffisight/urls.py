@@ -24,7 +24,7 @@ from user_app import views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('speed_estimation/get_stats/', views.dummy_get_stats, name='get_stats'),
+    path('speed_estimation/get_stats/', views.get_stats, name='get_stats'),
     path('video_feed/', user_views.video_feed, name='video_feed'),
     path('', include('user_app.urls')),
 ]

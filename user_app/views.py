@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login, logout
-from .models import Record,Station
+from .models import Record,Station,Vehicle
 from .forms import StationSignUpForm ,StationLoginForm
 from django.http import HttpResponse,StreamingHttpResponse
 from django.contrib import messages
+from django.db import models
 from django.views.decorators.csrf import ensure_csrf_cookie
 from speed_estimation.main import process_video_stream
 from django.http import JsonResponse
@@ -90,12 +91,64 @@ def Records(request):
     return render(request, 'Records.html', context)
 
 def video_feed(request):
-    return StreamingHttpResponse(process_video_stream(request), content_type='multipart/x-mixed-replace; boundary=frame')
-
+    try:
+        return StreamingHttpResponse(
+            process_video_stream(request), 
+            content_type='multipart/x-mixed-replace; boundary=frame'
+        )
+    except Exception as e:
+        print(f"Error in video_feed: {e}")
+        return HttpResponse(f"Error: {str(e)}", status=500)
+    
 def get_notifications(request):
     alerts = request.session.get('alerts', [])
     request.session['alerts'] = []  # Clear after fetching
-    return JsonResponse({'alerts': alerts})
+    
+    # Get total violation count from database
+    total_violations = Vehicle.objects.aggregate(
+        total_violations=models.Sum('violation_count')
+    )['total_violations'] or 0
+    
+    return JsonResponse({
+        'alerts': alerts,
+        'total_violations': total_violations,
+        'alert_count': len(alerts)
+    })
+
+# Add a new endpoint for getting violation statistics
+def get_violation_stats(request):
+    """Get violation statistics for the dashboard"""
+    try:
+        # Get total violations
+        total_violations = Vehicle.objects.aggregate(
+            total_violations=models.Sum('violation_count')
+        )['total_violations'] or 0
+        
+        # Get recent violations (last 24 hours)
+        from datetime import datetime, timedelta
+        yesterday = datetime.now() - timedelta(days=1)
+        recent_violations = Record.objects.filter(
+            date__gte=yesterday,
+            speed__gt=speed_limit
+        ).count()
+        
+        # Get alerts from session
+        alerts = request.session.get('alerts', [])
+        
+        return JsonResponse({
+            'total_violations': total_violations,
+            'recent_violations': recent_violations,
+            'alert_count': len(alerts),
+            'alerts': alerts
+        })
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'total_violations': 0,
+            'recent_violations': 0,
+            'alert_count': 0
+        }, status=500)
+
 class RecordPagination(PageNumberPagination):
     page_size = 7
     page_size_query_param = 'page_size'

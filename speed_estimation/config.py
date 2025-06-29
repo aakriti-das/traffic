@@ -1,17 +1,17 @@
 import numpy as np
 import cv2
 from speed_estimation.db.db import get_mac_address,get_speed_limit
-vehicle_detection_model_path='models/yolov8m.pt'
+vehicle_detection_model_path='models/Vehicle_Detection_Model.pt'
 license_detection_model_path='models/license_detection_model.pt'
 license_plate_segmentation_model_path='models/license_plate_segmentation_model.pt'
 classifier_model_path='models/classifier_model.pth'
 # speed_limit=get_speed_limit()   
 speed_limit=5
 # Common vehicle class names in COCO
-VEHICLE_CLASSES = ['car', 'truck', 'bus', 'motorbike', 'motorcycle']
+VEHICLE_CLASSES = ['vehicle','car', 'truck', 'bus', 'motorbike', 'motorcycle']
 MAC_ADDRESS = get_mac_address()
 
-video_path="Test_Videos/testt.mp4"
+video_path="Test_Videos/car.mp4"
 
 src_points = np.float32([
     [610, 175],   # top-left

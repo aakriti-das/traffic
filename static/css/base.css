@@ -39,8 +39,8 @@ body {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
     min-height: 100vh;
-    
-}    
+    overflow-x: hidden !important;
+}
 
 
 /* Sidebar */
@@ -144,7 +144,7 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-secondary);
-    
+
 }
 
 .location-info {
@@ -155,7 +155,7 @@ body {
     background-color: var(--surface-color);
     border-radius: 0.75rem;
     box-shadow: var(--shadow-sm);
-    
+
 }
 
 .location-info i {
@@ -187,6 +187,30 @@ body {
     border: none;
     transition: background 0.3s;
 }
+
+/* Stylish Logout Button */
+.logout-button {
+display: inline-block;
+padding: 10px 24px;
+background-color: #dc2626; /* red-600 */
+color: #ffffff;
+font-size: 15px;
+font-weight: 600;
+border-radius: 6px;
+text-decoration: none;
+transition: background-color 0.3s ease, transform 0.2s ease;
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logout-button:hover {
+ background-color: #b91c1c; /* darker red */
+transform: translateY(-1px);
+}
+
+.logout-button:active {
+transform: scale(0.98);
+}
+
 
 .notification-badge {
     position: absolute;

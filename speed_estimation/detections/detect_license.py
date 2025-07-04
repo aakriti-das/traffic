@@ -7,9 +7,8 @@ from speed_estimation.db.db import update_record,match_license_plate
 
 model = YOLO(license_detection_model_path)
 
-save_dir ="Detected_licenseplates"  # Directory to save cropped license plates
 
-def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
+def detect_license_plate(request,vehicle_crop,  prefix="licenseplate"):
     results = model(vehicle_crop)
     detections = []
     output = []
@@ -33,24 +32,14 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
                     2
                 )
                 # Save cropped license plate if save_dir is provided
-                if save_dir is not None:
-                    os.makedirs(save_dir, exist_ok=True)
-                    crop = vehicle_crop[y1:y2, x1:x2]
-                    if crop.size > 0:
-                        idx+=1
-                        filename = os.path.join(save_dir, f"{prefix}_{idx}_{box_num}.jpg")
-                        cv2.imwrite(filename, crop)
-                        # print(f"Saved license plate crop to {filename}")
-                        # cv2.imshow('Cropped License Plate', crop)  # Display the cropped license plate
-                        # cv2.waitKey(1)
-                        record=update_record(record.id,None,crop)
-                        license_text = read_license_plate(crop)
-                        record=update_record(record.id,license_text,None)
-                        print(f"Detected license text: {license_text}")
-                        match_license_plate(record)
+
+                crop = vehicle_crop[y1:y2, x1:x2]
+                if crop.size > 0:
+                    license_text = read_license_plate(crop)
+                        
 
                         # Append bbox and text
-                    output.append(((x1, y1, x2, y2), license_text))
+                    output.append(((x1, y1, x2, y2), license_text,crop))
     return output
 
 # Example usage:
@@ -58,4 +47,4 @@ def detect_license_plate(vehicle_crop,record,  prefix="licenseplate"):
 # detect_license_plate(img, save_dir="licenseplates", prefix="test")
 # cv2.imshow('Input Image', img)
 # cv2.waitKey(0)
-# cv2.destroyAllWindows()
+# cv2.destroyAllWindows

@@ -4,36 +4,28 @@ $(document).ready(function () {
       url: "/api/records/",
       method: "GET",
       success: function (data) {
-        // Extract the last 7 records from the data array
-        const lastSevenRecords = data.slice(-7);
+        const lastFiveRecords = data.slice(-5);
 
         const tbody = $("#myTable tbody");
         tbody.empty();
 
-
-        lastSevenRecords.forEach(function (record, index) {
+        lastFiveRecords.forEach(function (record, index) {
           const row = $("<tr>");
-          // Display the index + 1 to show the serial number starting from 1
           row.append($("<td>").text(index + 1));
-          row.append($("<td>").text(record.licenseplate_no));
-          row.append($("<td>").text(record.speed));
-          row.append($("<td>").text(record.date));
+          row.append($("<td>").text(record.licenseplate_no || 'N/A'));
+          row.append($("<td>").text(record.speed || '0'));
+          row.append($("<td>").text(record.date || 'N/A'));
 
           tbody.append(row);
         });
 
-        //   data.forEach(function (record, index) {
-        //     const row = $("<tr>");
-        //     row.append($("<td>").text(index + 1));
-        //     row.append($("<td>").text(record.licenseplate_no));
-        //     row.append($("<td>").text(record.speed));
-        //     row.append($("<td>").text(record.date));
-        //     row.append($("<td>").text(record.count));
-        //     tbody.append(row);
-        //   });
       },
-      error: function (error) {
-        console.log("Error fetching records:", error);
+      error: function (xhr, status, error) {
+        console.log("Error fetching records:", {
+          status: status,
+          error: error,
+          readyState: xhr.readyState
+        });
       },
     });
   }
@@ -42,5 +34,5 @@ $(document).ready(function () {
   fetchRecords();
 
   // Fetch records periodically (e.g., every 2 seconds) for real-time updates
-  setInterval(fetchRecords, 2000); // Update every 2 seconds
+  setInterval(fetchRecords, 2000); // Increased interval to reduce server load
 });

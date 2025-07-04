@@ -42,7 +42,7 @@ def read_license_plate(image_input):
         image = image_input
     else:
         raise TypeError("Input must be a file path or numpy array.")
-
+    # image=preprocess_plate(image)
     # Convert to RGB for further processing
     if image.ndim == 2:
         rgb_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
@@ -79,8 +79,8 @@ def read_license_plate(image_input):
     for box in sorted_boxes:
         x1, y1, x2, y2 = map(int, box)
         crop = rgb_image[y1:y2, x1:x2]
-        # cv2.imshow("Character Crop", crop)  # Display each crop for debugging
-        # cv2.waitKey(1000)  
+        # cv2.imshow("Char",crop)
+        # cv2.waitKey(1000)
         char_crops.append(crop)
 
         # Convert OpenCV image (numpy array) to PIL Image for transform
@@ -98,3 +98,27 @@ def read_license_plate(image_input):
     print(f"Detected license text: {license_text}")
     return license_text
 
+def preprocess_plate(license_plate_image):
+    #Resizing
+    resized_img=cv2.resize(license_plate_image,(224,224))
+    # cv2.imshow("resize ",resized_img)
+    # cv2.waitKey(1000)
+    #Grayscale conversion
+    gray=cv2.cvtColor(resized_img,cv2.COLOR_BGR2GRAY)
+    # cv2.imshow("gray ",gray)
+    # cv2.waitKey(0)
+    #Normalizaation
+    normalized_img = resized_img / 255.0
+    # cv2.imshow("normal ",normalized_img)
+    # cv2.waitKey(0)
+    # Gaussian blur for noise reduction
+    blurred_img = cv2.GaussianBlur(resized_img, (5, 5), 0)
+    # cv2.imshow("blurred ",blurred_img)
+    # cv2.waitKey(0)
+    # Simple thresholding
+    ret, binary_img = cv2.threshold(resized_img, 127, 255, cv2.THRESH_BINARY)
+    # cv2.imshow("thres ",binary_img)
+    # cv2.waitKey(1000)
+    return binary_img
+
+# read_license_plate("Detected_licenseplates/licenseplate_1_0.jpg")

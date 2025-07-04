@@ -1,10 +1,12 @@
 from django.core.files import File
 from django.utils import timezone
+from django.contrib import messages
 import cv2,uuid
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 from user_app.models import Record, Station,Vehicle
+from notification.mail import send_mail
 
 def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_image_path: str = None,licenseplate_no: str = None,station: Station = None):
     if station is None:
@@ -60,18 +62,40 @@ def update_record(record_id: int,licenseplate_no: str = None,license_plate_image
     record.save()
     return record
 
-def match_license_plate(record):
-    record_license_plate=record.licenseplate_no 
+def match_license_plate(request, record):
+    record_license_plate = record.licenseplate_no 
 
-    matching_vehicles=Vehicle.objects.filter(licenseplate_no=record_license_plate)
+    matching_vehicles = Vehicle.objects.filter(licenseplate_no=record_license_plate)
 
     if matching_vehicles.exists():
         for vehicle in matching_vehicles:
-            vehicle.violation_count+=1
+            vehicle.violation_count = vehicle.violation_count + 1
             vehicle.save()
-            print(f"Speeding Vehicle Owner:{vehicle.owner_name} \n Contact Number:{vehicle.contact_number}")
+            print(f"Speeding Vehicle Owner:{vehicle.owner_name} \n Contact Number:{vehicle.contact_number} Email:{vehicle.email_id}")
             print(f"Overspeeded for {vehicle.violation_count}th time")
-            # send_sms(vehicle.contact_number)x 
+            
+            # Enhanced alert message
+            alert_message = f'🚨 SPEEDING ALERT: Vehicle {record.licenseplate_no} detected at {record.speed} km/h! Owner: {vehicle.owner_name} | Contact: {vehicle.contact_number} | Violations: {vehicle.violation_count}'
+            
+            alerts = request.session.get('alerts', [])
+            alerts.append({
+                'type': 'warning',
+                'message': alert_message,
+                'timestamp': timezone.now().isoformat(),
+                'vehicle_id': vehicle.id,
+                'speed': record.speed,
+                'violation_count': vehicle.violation_count
+            })
+            request.session['alerts'] = alerts
+            request.session.modified = True  # Ensure session is saved
+            
+            # Send email notification
+            FineAmount = 500
+            body = f"The vehicle with LicensePlate {record.licenseplate_no} have been fined Rs{FineAmount} for overspeeding at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
+            email = vehicle.email_id
+            send_mail(body, [email])
+            
+            print(f"Alert added to session: {alert_message}")
 
 def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
     # Convert OpenCV BGR to RGB

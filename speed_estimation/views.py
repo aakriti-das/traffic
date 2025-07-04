@@ -42,39 +42,39 @@
 # #         logger.error(f"Error in video_feed: {str(e)}")
 # #         return HttpResponse(f"Error: {str(e)}", status=500)
 
-# @csrf_exempt
-# def get_stats(request):
-#     if request.method == 'POST':
-#         try:
-#             logger.debug("Stats requested")
-#             cam = get_camera()
-#             if cam is None:
-#                 return JsonResponse({'error': 'Camera not initialized'}, status=500)
-
-#             # Get tracked vehicles
-#             tracked_vehicles = cam.tracker_id_to_coordinates
-#             vehicle_count = len(tracked_vehicles)
-            
-#             # Calculate max speed
-#             speeds = []
-#             for coords in tracked_vehicles.values():
-#                 if len(coords) >= 2:  # Need at least 2 points to calculate speed
-#                     speed = calculate_speed(coords, cam.fps)
-#                     speeds.append(speed)
-            
-#             current_speed = max(speeds) if speeds else 0
-            
-#             stats = {
-#                 'vehicle_count': vehicle_count,
-#                 'current_speed': round(current_speed, 1)
-#             }
-#             logger.debug(f"Stats calculated: {stats}")
-#             return JsonResponse(stats)
-#         except Exception as e:
-#             logger.error(f"Error in get_stats: {str(e)}")
-#             return JsonResponse({'error': str(e)}, status=500)
-#     return JsonResponse({'error': 'Method not allowed'}, status=405)
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from speed_estimation.state_manager import vehicle_state
+import json
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_stats(request):
+    """Get real-time vehicle statistics"""
+    try:
+        # Get current stats from state manager
+        stats = vehicle_state.get_current_stats()
+        
+        return JsonResponse({
+            'vehicle_count': stats['vehicle_count'],
+            'current_speed': stats['current_speed'],
+            'active_vehicles': stats['active_vehicles'],
+            'status': 'success'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'vehicle_count': 0,
+            'current_speed': 0,
+            'status': 'error'
+        }, status=500)
+
+# Keep the dummy function for testing
 def dummy_get_stats(request):
-    return JsonResponse({"message": "No longer supported."})
+    """Dummy stats for testing when video processing is not running"""
+    return JsonResponse({
+        'vehicle_count': 5,
+        'current_speed': 45,
+        'status': 'dummy'
+    })

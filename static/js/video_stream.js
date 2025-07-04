@@ -1,8 +1,7 @@
-let videoStream = null;
+let videoStream = false;
 let statsInterval = null;
 let retryCount = 0;
 const MAX_RETRIES = 3;
-let isManuallyStopped = false;
 
 
 // DOM Elements
@@ -11,6 +10,7 @@ const errorElement = document.getElementById('video-error');
 const loadingElement = document.getElementById('loading-indicator');
 const startButton = document.querySelector('.start-camera');
 const stopButton = document.querySelector('.stop-camera');
+const bellButton = document.getElementById('notification-button');
 const statusDot = document.querySelector('.status-dot');
 
 function showError() {
@@ -29,12 +29,7 @@ function hideLoadingAndError() {
 }
 
 function handleVideoError(event) {
-
     console.error('Video stream error:', event);
-    if (isManuallyStopped) {
-        console.log('Video error ignored because camera was manually stopped.');
-        return;
-    }
     if (retryCount < MAX_RETRIES) {
         retryCount++;
         console.log(`Retrying video stream (${retryCount}/${MAX_RETRIES})...`);
@@ -52,15 +47,23 @@ function handleVideoLoad() {
 }
 
 function startCamera() {
+    console.log({ startButton, stopButton });
     if (!videoStream) {
         showLoading();
-        isManuallyStopped = false; // reset flag on start   
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
         if (videoElement) {
             videoElement.src = `${videoElement.dataset.url}?t=${Date.now()}`;
-
             videoStream = true;
+            // Add error handling for video element
+            videoElement.onerror = function () {
+                console.error('Video element error');
+                handleVideoError(new Error('Video element failed to load'));
+            };
+
+            videoElement.onloadstart = function () {
+                console.log('Video stream starting...');
+            };
         }
 
         // Update UI
@@ -72,16 +75,16 @@ function startCamera() {
         if (!statsInterval) {
             statsInterval = setInterval(updateStats, 2000);
         }
+        console.log('Camera started');
     }
 }
 
 function stopCamera() {
+    console.log({ startButton, stopButton });
     if (videoStream) {
-        isManuallyStopped = true; // indicate manual stop
         if (videoElement) {
             videoElement.src = '';
             videoElement.removeAttribute('src');
-            videoElement.load(); // Optional cleanup
         }
         videoStream = false;
 
@@ -112,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize button states
     if (stopButton) stopButton.disabled = true;
+    if (startButton) startButton.disabled = false;
     if (statusDot) statusDot.style.backgroundColor = 'var(--danger-color)';
     hideLoadingAndError();
 
@@ -129,11 +133,19 @@ document.addEventListener('DOMContentLoaded', function () {
         stopButton.addEventListener('click', stopCamera);
     }
 
-    // Automatically start the video stream
+    // Optional: Auto-start with error recovery
     setTimeout(() => {
-        startCamera();
         console.log('Auto-starting video stream...');
-    }, 500); // Small delay to ensure everything is initialized
+        startCamera();
+
+        // If auto-start fails, re-enable the start button after 5 seconds
+        setTimeout(() => {
+            if (!videoStream && startButton) {
+                startButton.disabled = false;
+                console.log('Auto-start failed - start button re-enabled');
+            }
+        }, 5000);
+    }, 2000);
 });
 
 // Get CSRF token
@@ -152,7 +164,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Update stats periodically
+// Update stats periodically with better error handling
 async function updateStats() {
     if (!videoStream) return;
 
@@ -172,18 +184,63 @@ async function updateStats() {
         }
 
         const data = await response.json();
-        if (data.error) {
+
+        // Handle different response formats
+        if (data.status === 'error') {
             throw new Error(data.error);
         }
 
         const vehicleCount = document.getElementById('vehicle-count');
         const currentSpeed = document.getElementById('current-speed');
-        if (vehicleCount) vehicleCount.textContent = data.vehicle_count;
-        if (currentSpeed) currentSpeed.textContent = data.current_speed;
+
+        if (vehicleCount) vehicleCount.textContent = data.vehicle_count || '0';
+        if (currentSpeed) currentSpeed.textContent = data.current_speed || '0';
+
+        console.log('Stats updated:', data);
+
     } catch (error) {
         console.error('Error updating stats:', error);
+        // Don't stop camera on network errors, just log them
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            stopCamera();
+            console.log('Network error - server might not be running');
         }
     }
 }
+
+// Same bell icon click logic
+bellButton.addEventListener('click', async function () {
+    const dropdown = document.getElementById('notification-dropdown');
+    const list = document.getElementById('notification-list');
+    const badge = document.getElementById('notification-count');
+    if (dropdown) {
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
+    try {
+        const response = await fetch('/notifications/');
+        const data = await response.json();
+        const alerts = data.alerts || [];
+
+        if (list) {
+            list.innerHTML = '';
+            if (alerts.length > 0) {
+                alerts.forEach(alert => {
+                    const li = document.createElement('li');
+                    li.textContent = alert.message;
+                    li.classList.add('alert-item', `alert-${alert.type}`);
+                    list.appendChild(li);
+                });
+
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = alerts.length;
+                }
+            } else {
+                if (badge) badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+    }
+});
+

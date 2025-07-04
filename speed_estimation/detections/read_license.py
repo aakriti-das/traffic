@@ -84,7 +84,15 @@ def read_license_plate(image_input):
         char_crops.append(crop)
 
         # Convert OpenCV image (numpy array) to PIL Image for transform
-        pil_crop = Image.fromarray(crop)
+        if crop.shape[0] == 0 or crop.shape[1] == 0:
+            print(f"Skipping empty crop with shape: {crop.shape}")
+            continue
+
+        try:
+            pil_crop = Image.fromarray(crop)
+        except Exception as e:
+            print(f"Failed to convert crop to PIL image: {e}")
+            continue
 
         # Apply classifier
         input_tensor = transform(pil_crop).unsqueeze(0)  # (1, 1, 28, 28)
@@ -98,27 +106,11 @@ def read_license_plate(image_input):
     print(f"Detected license text: {license_text}")
     return license_text
 
-def preprocess_plate(license_plate_image):
-    #Resizing
-    resized_img=cv2.resize(license_plate_image,(224,224))
-    # cv2.imshow("resize ",resized_img)
-    # cv2.waitKey(1000)
-    #Grayscale conversion
-    gray=cv2.cvtColor(resized_img,cv2.COLOR_BGR2GRAY)
-    # cv2.imshow("gray ",gray)
-    # cv2.waitKey(0)
-    #Normalizaation
-    normalized_img = resized_img / 255.0
-    # cv2.imshow("normal ",normalized_img)
-    # cv2.waitKey(0)
-    # Gaussian blur for noise reduction
-    blurred_img = cv2.GaussianBlur(resized_img, (5, 5), 0)
-    # cv2.imshow("blurred ",blurred_img)
-    # cv2.waitKey(0)
-    # Simple thresholding
-    ret, binary_img = cv2.threshold(resized_img, 127, 255, cv2.THRESH_BINARY)
-    # cv2.imshow("thres ",binary_img)
-    # cv2.waitKey(1000)
-    return binary_img
+def preprocess_plate(crop):
+    gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    gray = cv2.bilateralFilter(gray, 11, 17, 17)  # Noise reduction
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY, 11, 2)
+    return thresh
 
 # read_license_plate("Detected_licenseplates/licenseplate_1_0.jpg")

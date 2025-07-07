@@ -5,7 +5,7 @@ import cv2,uuid
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
-from user_app.models import Record, Station,Vehicle
+from user_app.models import Record, Station,Vehicle, Alert
 from notification.mail import send_mail
 
 def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_image_path: str = None,licenseplate_no: str = None,station: Station = None):
@@ -77,6 +77,17 @@ def match_license_plate(request, record):
             # Enhanced alert message
             alert_message = f'🚨 SPEEDING ALERT: Vehicle {record.licenseplate_no} detected at {record.speed} km/h! Owner: {vehicle.owner_name} | Contact: {vehicle.contact_number} | Violations: {vehicle.violation_count}'
             
+            # Save alert to database instead of session
+            Alert.objects.create(
+                station=record.stationID,
+                alert_type='warning',
+                message=alert_message,
+                vehicle_id=vehicle.id,
+                speed=record.speed,
+                violation_count=vehicle.violation_count
+            )
+            
+            # Also add to session for immediate access (optional)
             alerts = request.session.get('alerts', [])
             alerts.append({
                 'type': 'warning',
@@ -87,7 +98,7 @@ def match_license_plate(request, record):
                 'violation_count': vehicle.violation_count
             })
             request.session['alerts'] = alerts
-            request.session.modified = True  # Ensure session is saved
+            request.session.modified = True
             
             # Send email notification
             FineAmount = 500
@@ -95,7 +106,7 @@ def match_license_plate(request, record):
             email = vehicle.email_id
             send_mail(body, [email])
             
-            print(f"Alert added to session: {alert_message}")
+            print(f"Alert saved to database: {alert_message}")
 
 def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
     # Convert OpenCV BGR to RGB

@@ -11,7 +11,7 @@ speed_limit=5
 VEHICLE_CLASSES = ['vehicle','car', 'truck', 'bus', 'motorbike', 'motorcycle']
 MAC_ADDRESS = get_mac_address()
 
-video_path="Test_Videos/aakashePul.mp4"
+video_path="Test_Videos/car.mp4"
 
 src_points = np.float32([
     [610, 175],   # top-left

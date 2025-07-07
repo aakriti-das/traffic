@@ -3,6 +3,9 @@ let statsInterval = null;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 
+// Enhanced notification system
+let notificationInterval = null;
+let lastAlertCount = 0;
 
 // DOM Elements
 const videoElement = document.getElementById('video-stream');
@@ -146,6 +149,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }, 5000);
     }, 2000);
+
+    // Start notification polling
+    startNotificationPolling();
+
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+
+    // Initial fetch
+    fetchNotifications();
 });
 
 // Get CSRF token
@@ -207,40 +221,146 @@ async function updateStats() {
     }
 }
 
-// Same bell icon click logic
-bellButton.addEventListener('click', async function () {
-    const dropdown = document.getElementById('notification-dropdown');
-    const list = document.getElementById('notification-list');
-    const badge = document.getElementById('notification-count');
-    if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-    }
+// Enhanced notification system
 
+// Function to update notification badge
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-count');
+    if (badge) {
+        if (count > 0) {
+            badge.style.display = 'inline-block';
+            badge.textContent = count;
+            // Add animation for new alerts
+            if (count > lastAlertCount) {
+                badge.classList.add('pulse');
+                setTimeout(() => badge.classList.remove('pulse'), 1000);
+            }
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    lastAlertCount = count;
+}
+
+// Function to fetch and display notifications
+async function fetchNotifications() {
     try {
         const response = await fetch('/notifications/');
         const data = await response.json();
         const alerts = data.alerts || [];
 
-        if (list) {
-            list.innerHTML = '';
-            if (alerts.length > 0) {
-                alerts.forEach(alert => {
-                    const li = document.createElement('li');
-                    li.textContent = alert.message;
-                    li.classList.add('alert-item', `alert-${alert.type}`);
-                    list.appendChild(li);
-                });
+        updateNotificationBadge(alerts.length);
 
-                if (badge) {
-                    badge.style.display = 'inline-block';
-                    badge.textContent = alerts.length;
-                }
-            } else {
-                if (badge) badge.style.display = 'none';
+        // Update notification list if dropdown is open
+        const list = document.getElementById('notification-list');
+        if (list && document.getElementById('notification-dropdown').style.display === 'block') {
+            displayNotifications(alerts);
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return { alerts: [], alert_count: 0 };
+    }
+}
+
+// Function to display notifications in dropdown
+function displayNotifications(alerts) {
+    const list = document.getElementById('notification-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (alerts.length > 0) {
+        alerts.forEach(alert => {
+            const li = document.createElement('li');
+            li.className = `alert-item alert-${alert.type || 'warning'}`;
+
+            // Create notification content with more details
+            li.innerHTML = `
+                <div class="alert-content">
+                    <div class="alert-message">${alert.message}</div>
+                    <div class="alert-meta">
+                        <span class="alert-time">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+                        ${alert.speed ? `<span class="alert-speed">${alert.speed} km/h</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            list.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.textContent = 'No new notifications';
+        li.className = 'no-alerts';
+        list.appendChild(li);
+    }
+}
+
+// Function to clear notifications
+async function clearNotifications() {
+    try {
+        const response = await fetch('/notifications/clear/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            updateNotificationBadge(0);
+            const list = document.getElementById('notification-list');
+            if (list) {
+                list.innerHTML = '<li class="no-alerts">No new notifications</li>';
             }
         }
     } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error('Error clearing notifications:', error);
+    }
+}
+
+// Enhanced bell button click handler
+bellButton.addEventListener('click', async function () {
+    const dropdown = document.getElementById('notification-dropdown');
+
+    if (dropdown) {
+        const isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+
+        if (!isVisible) {
+            // Fetch fresh notifications when opening dropdown
+            const data = await fetchNotifications();
+            displayNotifications(data.alerts);
+        }
     }
 });
+
+// Start notification polling
+function startNotificationPolling() {
+    if (!notificationInterval) {
+        notificationInterval = setInterval(async () => {
+            const data = await fetchNotifications();
+
+            // Show desktop notification for new alerts
+            if (data.alert_count > lastAlertCount && data.alert_count > 0) {
+                showDesktopNotification('New Traffic Alert',
+                    `${data.alert_count - lastAlertCount} new speeding violation(s) detected!`);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+}
+
+// Desktop notification function
+function showDesktopNotification(title, message) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: message, icon: '/static/images/traffic_logo.png' });
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                new Notification(title, { body: message, icon: '/static/images/traffic_logo.png' });
+            }
+        });
+    }
+}
 

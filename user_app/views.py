@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login, logout
-from .models import Record,Station,Vehicle
+from .models import Record,Station,Vehicle,Alert
 from .forms import StationSignUpForm ,StationLoginForm
 from django.http import HttpResponse,StreamingHttpResponse
 from django.contrib import messages
@@ -101,8 +101,30 @@ def video_feed(request):
         return HttpResponse(f"Error: {str(e)}", status=500)
     
 def get_notifications(request):
-    alerts = request.session.get('alerts', [])
-    request.session['alerts'] = []  # Clear after fetching
+    """Get notifications from database"""
+    station_id = request.session.get('station_id')
+    
+    if station_id:
+        # Get alerts from database for this station
+        alerts = Alert.objects.filter(
+            station_id=station_id,
+            is_read=False
+        ).order_by('-timestamp')[:50]  # Get last 50 unread alerts
+        
+        # Convert to JSON-serializable format
+        alerts_data = []
+        for alert in alerts:
+            alerts_data.append({
+                'id': alert.id,
+                'type': alert.alert_type,
+                'message': alert.message,
+                'timestamp': alert.timestamp.isoformat(),
+                'vehicle_id': alert.vehicle_id,
+                'speed': alert.speed,
+                'violation_count': alert.violation_count
+            })
+    else:
+        alerts_data = []
     
     # Get total violation count from database
     total_violations = Vehicle.objects.aggregate(
@@ -110,9 +132,41 @@ def get_notifications(request):
     )['total_violations'] or 0
     
     return JsonResponse({
-        'alerts': alerts,
+        'alerts': alerts_data,
         'total_violations': total_violations,
-        'alert_count': len(alerts)
+        'alert_count': len(alerts_data)
+    })
+
+def clear_notifications(request):
+    """Mark notifications as read"""
+    if request.method == 'POST':
+        station_id = request.session.get('station_id')
+        if station_id:
+            # Mark all alerts for this station as read
+            Alert.objects.filter(
+                station_id=station_id,
+                is_read=False
+            ).update(is_read=True)
+            
+            return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+def get_notification_stats(request):
+    """Get notification statistics for real-time updates"""
+    alerts = request.session.get('alerts', [])
+    
+    # Get recent violations (last 24 hours)
+    from datetime import datetime, timedelta
+    yesterday = datetime.now() - timedelta(days=1)
+    recent_violations = Record.objects.filter(
+        date__gte=yesterday,
+        speed__gt=speed_limit
+    ).count()
+    
+    return JsonResponse({
+        'alert_count': len(alerts),
+        'recent_violations': recent_violations,
+        'has_new_alerts': len(alerts) > 0
     })
 
 # Add a new endpoint for getting violation statistics

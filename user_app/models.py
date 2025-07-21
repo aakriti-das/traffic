@@ -33,3 +33,25 @@ class Vehicle(models.Model):
 
     def __str__(self):
         return f"Vehicle{self.id}"
+
+class Alert(models.Model):
+    ALERT_TYPES = [
+        ('warning', 'Warning'),
+        ('danger', 'Danger'),
+        ('info', 'Info'),
+    ]
+    
+    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    alert_type = models.CharField(max_length=10, choices=ALERT_TYPES, default='warning')
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    vehicle_id = models.IntegerField(null=True, blank=True)
+    speed = models.FloatField(null=True, blank=True)
+    violation_count = models.IntegerField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"{self.alert_type}: {self.message[:50]}"

@@ -249,10 +249,18 @@ body {
     }
 }
 
+.notification-wrapper {
+    position: relative;
+    /* This makes the dropdown position correctly relative to the bell */
+    display: inline-block;
+}
+
 .notification-dropdown {
     position: absolute;
     top: 100%;
+    /* Places the dropdown just below the bell */
     right: 0;
+    margin-top: 8px;
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -261,6 +269,7 @@ body {
     max-height: 400px;
     overflow-y: auto;
     z-index: 1000;
+    padding: 10px;
 }
 
 .alert-item {

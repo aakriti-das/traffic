@@ -104,13 +104,13 @@ body {
     transition: background 0.7s;
 }
 
-.nav-item.active {
+/* .nav-item.active {
     background: linear-gradient(90deg, #ff7e5f, #feb47b);
     color: #ffffff;
     border: none;
     transition: background 0.3s;
     box-shadow: var(--shadow-md);
-}
+} */
 
 .nav-item i {
     font-size: 1.25rem;

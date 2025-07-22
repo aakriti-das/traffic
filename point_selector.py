@@ -1,18 +1,47 @@
 import cv2
+import os
+import django
+import sys
+
+# Django setup
+sys.path.append(r"C:\Users\reala\TrafficSight\traffic")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traffisight.settings')
+django.setup()
+
 from speed_estimation.config import video_path
 
 points = []
 
 def click_event(event, x, y, flags, param):
+    global frame, points
     if event == cv2.EVENT_LBUTTONDOWN and len(points) < 4:
         points.append((x, y))
         print(f"Point {len(points)}: ({x}, {y})")
         cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
-        cv2.imshow("Select 4 Points", frame)
+        redraw_frame()
+
+        # Automatically quit when 4 points selected
+        if len(points) == 4:
+            cv2.destroyAllWindows()
+
+def redraw_frame():
+    """Redraw the frame with text and points."""
+    display_frame = frame.copy()
+    
+    # Draw instruction text
+    cv2.putText(display_frame,
+                "Click 4 road points (clockwise/counter). Press 'q' to quit.",
+                (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                (255, 255, 255), 2, cv2.LINE_AA)
+
+    # Draw selected points
+    for p in points:
+        cv2.circle(display_frame, p, 5, (0, 255, 0), -1)
+
+    cv2.imshow("Select 4 Points", display_frame)
 
 # Load a frame from the video
 cap = cv2.VideoCapture(video_path)
-
 ret, frame = cap.read()
 cap.release()
 
@@ -20,10 +49,10 @@ if not ret:
     print("❌ Failed to read video frame.")
     exit()
 
-cv2.imshow("Select 4 Points", frame)
-cv2.setMouseCallback("Select 4 Points", click_event)
-
 print("🖱 Click on 4 road points in order (clockwise or counter-clockwise). Press 'q' to quit.")
+redraw_frame()
+
+cv2.setMouseCallback("Select 4 Points", click_event)
 
 while True:
     key = cv2.waitKey(0)
@@ -35,5 +64,6 @@ cv2.destroyAllWindows()
 if len(points) == 4:
     print("\n✅ Selected src_points:")
     print("src_points =", points)
+
 else:
     print("⚠️ You didn't select 4 points.")

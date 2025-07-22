@@ -72,4 +72,9 @@ Detected_licenseplates/
 *.log
 local_settings.py
 db.sqlite3
+db
 db.sqlite3-journal
+synthetic_plates_nepali/
+debug_plates/ 
+req.txt
+db.sqlite3

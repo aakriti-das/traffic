@@ -3,16 +3,16 @@ import cv2
 from speed_estimation.db.db import get_mac_address,get_speed_limit
 vehicle_detection_model_path='models/Vehicle_Detector.pt'
 license_detection_model_path='models/LP_Detector.pt'
-PlateReaderModel='models/PlateReaderModel.pt'
+PlateReaderModel='models/Character_Detection_model.pt'
 license_plate_segmentation_model_path='models/license_plate_segmentation_model.pt'
 classifier_model_path='models/classifier_model.pth'
 # speed_limit=get_speed_limit()   
-speed_limit=5
+speed_limit=0
 # Common vehicle class names in COCO
 VEHICLE_CLASSES = ['vehicle','car', 'truck', 'bus', 'motorbike', 'motorcycle']
 MAC_ADDRESS = get_mac_address()
 
-video_path="Test_Videos/aakriti.mp4"
+video_path="Test_Videos/Test.MOV"
 
 # src_points = np.float32([
 #     [610, 175],   # top-left
@@ -21,7 +21,7 @@ video_path="Test_Videos/aakriti.mp4"
 #     [230, 610]    # bottom-left
 # ])
 
-src_points = np.float32([[(46, 489), (464, 494), (1383, 714), (20, 778)]])
+src_points = np.float32([[(78, 186), (242, 185), (569, 232), (198, 353)]])
 dst_points = np.float32([
     [0, 0],
     [10, 0],

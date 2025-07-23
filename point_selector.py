@@ -38,7 +38,13 @@ def redraw_frame():
     for p in points:
         cv2.circle(display_frame, p, 5, (0, 255, 0), -1)
 
-    cv2.imshow("Select 4 Points", display_frame)
+    # Resize for display (e.g., width=640, keep aspect ratio)
+    display_width = 640
+    h, w = display_frame.shape[:2]
+    scale = display_width / w
+    display_resized = cv2.resize(display_frame, (display_width, int(h * scale)))
+
+    cv2.imshow("Select 4 Points", display_resized)
 
 # Load a frame from the video
 cap = cv2.VideoCapture(video_path)

@@ -4,6 +4,7 @@ from speed_estimation.config import vehicle_detection_model_path, VEHICLE_CLASSE
 
 import supervision as sv
 import numpy as np
+import cv2
 
 model = YOLO(vehicle_detection_model_path)
 
@@ -39,9 +40,14 @@ def detect_vehicle(frame: np.ndarray) -> tuple[sv.Detections, np.ndarray]:
         detections = sv.Detections.empty()
     else:
         detections = sv.Detections(
-        xyxy=np.array(xyxy, dtype=np.float32),
-        confidence=np.array(confidences, dtype=np.float32),
-        class_id=np.array(class_ids, dtype=int),
+            xyxy=np.array(xyxy, dtype=np.float32),
+            confidence=np.array(confidences, dtype=np.float32),
+            class_id=np.array(class_ids, dtype=int),
         )
+
+    # Draw bright bounding boxes
+    for box in xyxy:
+        x1, y1, x2, y2 = map(int, box)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 255), 4)  # Bright white
 
     return detections, frame

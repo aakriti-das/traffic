@@ -36,10 +36,8 @@ def detect_license_plate(request,vehicle_crop,  prefix="licenseplate"):
                 crop = vehicle_crop[y1:y2, x1:x2]
                 if crop.size > 0:
                     license_text = read_license_plate(crop)
-                        
-
-                        # Append bbox and text
-                    output.append(((x1, y1, x2, y2), license_text,crop))
+                    # Append bbox and text
+                    output.append(((x1, y1, x2, y2), license_text, crop))
     return output
 
 # Example usage:

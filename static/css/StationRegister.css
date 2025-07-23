@@ -2,7 +2,12 @@
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background-color: #f4f6f8;
+    background-image: url("../images/bg.jpg");
+    background-color: #cccccc;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -35,8 +40,9 @@ margin-top: 20px;
 
 /* Form fields */
 form p {
-    text-align: left;
+    text-align: center;
     margin-bottom: 20px;
+    margin-right: 20px;
 }
 
 form label {
@@ -60,6 +66,7 @@ form input[type="password"] {
     border: 1px solid #ccc;
     border-radius: 8px;
     transition: border 0.3s;
+    
 }
 
 form input:focus {
@@ -69,20 +76,66 @@ form input:focus {
 
 /* Submit Button */
 button[type="submit"] {
-    width: 100%;
-    padding: 12px;
+    width: 200px;
+    padding: 10px 6px;
     background-color: #3b82f6;
     color: white;
     font-weight: 600;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    margin-right: 10px;
     transition: background 0.3s;
 }
 
 button[type="submit"]:hover {
     background-color: #2563eb;
 }
+.button-link {
+    display: block;
+    width: 185px;
+    padding: 7px;
+    font-size: 14px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    text-decoration: dashed;
+    /* font-weight: 600; */
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left:95px;
+    transition: background 0.3s;
+}
+
+.button-link:hover {
+    background-color: #2563eb;
+}
+
+.login-link {
+    display: block;
+    font-size: 14px;
+    width: 192px;
+    text-align: center;
+    padding: 4px;
+    padding-top: 8px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    text-decoration: dashed;
+    /* font-weight: 600; */
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+    margin-left: 95px;
+    
+}
+
+.login-link:hover {
+    background-color: #2563eb;
+}
+
 /* .page-header {
     display: flex;
     align-items: center;

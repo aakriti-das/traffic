@@ -3,54 +3,9 @@
 <html>
 <head>
     <title>Station Login</title>
-    <!-- <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f9f9f9;
-            display: flex;
-            justify-content: center;
-            padding-top: 100px;
-        }
+    
 
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-box form input[type="text"],
-        .login-box form input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            margin: 6px 0 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        .login-box button {
-            width: 100%;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-    </style> -->
+    </style>
   <title>Station Sign Up / Sign In</title>
   <link rel="stylesheet" href="{% static 'css/StationRegister.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -64,22 +19,21 @@
     {% endfor %}
   </ul>
 {% endif %}
-      <!-- Header -->
-  <!-- <header class="page-header">
-    <i class="fas fa-traffic-light"></i>
-    <span>TraffiSight</span>
-  </header> -->
     <div class="login-box">
         <h2>Station Login</h2>
         {% if error_message %}
-            <div class="error">{{ error_message }}</div>
+        <div class="error">{{ error_message }}</div>
         {% endif %}
+    
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Login</button>
-            <a href="/station-register">Register Station</a>
         </form>
+    
+        <!-- Moved outside the form -->
+        <a href="/station-register" class="button-link">Register Station</a>
     </div>
+
 </body>
 </html>

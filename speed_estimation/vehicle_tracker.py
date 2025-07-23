@@ -138,17 +138,15 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
 
             plate_text = plate_memory[tracker_id]["plate_text"]
     
-            # Draw plate box
-            cv2.rectangle(frame,(gx1, gy1), (gx2, gy2), (0, 255, 0), 2)
-            frame = draw_nepali_text_on_frame(frame, plate_text, (gx1, gy1 - 10))
-            # cv2.putText(frame, plate_text, (global_bbox[0], global_bbox[1] - 10),
-            # cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            # Draw plate box Removed because it slows down the processing
+            # cv2.rectangle(frame,(gx1, gy1), (gx2, gy2), (0, 255, 255), 4)
+            # frame = draw_nepali_text_on_frame(frame, plate_text, (gx1, gy1 - 30))
 
     # Annotate frame
-    annotated_frame = box_annotator.annotate(
-        scene=frame.copy(), detections=tracked_detections
-    )
+    # annotated_frame = box_annotator.annotate(
+    #     scene=frame.copy(), detections=tracked_detections
+    # )
     annotated_frame = label_annotator.annotate(
-        scene=annotated_frame, detections=tracked_detections, labels=labels
+        scene=frame, detections=tracked_detections, labels=labels
     )
     return annotated_frame, tracked_detections

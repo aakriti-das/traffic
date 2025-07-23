@@ -13,7 +13,7 @@ class StationSignUpForm(forms.ModelForm):
         model = Station
         fields = ['areacode', 'location','mac_address', 'speed_limit']
         widgets = {
-            'mac_address': forms.TextInput(attrs={'readonly': 'readonly'})
+            'mac_address': forms.TextInput(attrs={'readonly': 'readonly','hidden':'hidden'})
         }
 
 class StationLoginForm(forms.Form):

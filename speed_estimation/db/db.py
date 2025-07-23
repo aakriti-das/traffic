@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from user_app.models import Record, Station,Vehicle, Alert
 from notification.mail import send_mail
 
-def save_record(speed: int,count: int,vehicle_image_path: str,license_plate_image_path: str = None,licenseplate_no: str = None,station: Station = None):
+def save_record(speed: int, count: int, vehicle_image_path: str, license_plate_image_path: str = None, licenseplate_no: str = None, station: Station = None):
     if station is None:
         station = Station.objects.first()
     if station is None:
@@ -102,7 +102,7 @@ def match_license_plate(request, record):
             
             # Send email notification
             FineAmount = 500
-            body = f"The vehicle with LicensePlate {record.licenseplate_no} have been fined Rs{FineAmount} for overspeeding at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
+            body = f"Mr/Mrs. {vehicle.owner_name}, your vehicle with LicensePlate {record.licenseplate_no} have been fined Rs{FineAmount} for overspeeding at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
             email = vehicle.email_id
             send_mail(body, [email])
             
@@ -134,5 +134,4 @@ def get_speed_limit():
     except:
         return 30.0
 
-
-    
+ 

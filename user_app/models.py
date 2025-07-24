@@ -6,7 +6,7 @@ class Station(models.Model):
     areacode = models.PositiveIntegerField()
     location = models.CharField(max_length=80)
     mac_address = models.CharField(max_length=17)
-    speed_limit = models.IntegerField(default=30)
+    speed_limit = models.IntegerField(default=10)
 
     def __str__(self):
         return self.location

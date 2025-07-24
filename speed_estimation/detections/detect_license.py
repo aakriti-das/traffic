@@ -3,7 +3,7 @@ import cv2
 import os
 from speed_estimation.config import license_detection_model_path
 from .read_license import read_license_plate
-from speed_estimation.db.db import update_record,match_license_plate
+from speed_estimation.db.db import match_license_plate
 
 model = YOLO(license_detection_model_path)
 

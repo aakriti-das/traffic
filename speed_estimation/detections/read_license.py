@@ -16,6 +16,7 @@ from PIL import Image
 from speed_estimation.config import PlateReaderModel
 import os
 import time
+from sklearn.cluster import KMeans
 
 # Create a directory for debug images
 DEBUG_DIR = "debug_plates"
@@ -29,100 +30,6 @@ class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'BA', 'BAGMATI'
 model = YOLO(PlateReaderModel)  # path to trained detector
 # names = model.names  # class names
 # print(f"Loaded model with classes: {names.values()}")
-# Load classifier and class mapping (do this once)
-# class CharClassifier(nn.Module):
-#     def __init__(self, num_classes):
-#         super(CharClassifier, self).__init__()
-#         self.model = nn.Sequential(
-#             nn.Conv2d(1, 32, 3, padding=1),
-#             nn.ReLU(),
-#             nn.MaxPool2d(2),
-#             nn.Conv2d(32, 64, 3, padding=1),
-#             nn.ReLU(),
-#             nn.MaxPool2d(2),
-#             nn.Flatten(),
-#             nn.Linear(64 * 7 * 7, 128),
-#             nn.ReLU(),
-#             nn.Linear(128, num_classes)
-#         )
-
-#     def forward(self, x):
-#         return self.model(x)
-
-# def read_license_plate(image_input):
-#     print("Inside read_license_plate function")
-#     # Accept both file path and numpy array
-#     if isinstance(image_input, str):
-#         image = cv2.imread(image_input)
-#         if image is None:
-#             raise ValueError(f"Could not read image from path: {image_input}")
-#     elif isinstance(image_input, np.ndarray):
-#         image = image_input
-#     else:
-#         raise TypeError("Input must be a file path or numpy array.")
-#     # image=preprocess_plate(image)
-#     # Convert to RGB for further processing
-#     if image.ndim == 2:
-#         rgb_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-#     elif image.shape[2] == 3:
-#         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     else:
-#         raise ValueError("Unsupported image array shape for license plate input.")
-#     #Run detection
-#     results = model.predict(source=image, conf=0.3, iou=0.4)[0]  # returns one result
-
-#     # Get bounding boxes (x1, y1, x2, y2)
-#     boxes = results.boxes.xyxy.cpu().numpy()  # shape: (N, 4)
-#     # print("boxes:",boxes)
-#     # Sort boxes by x1 (left to right)
-#     sorted_boxes = sorted(boxes, key=lambda b: (b[1], b[0]))   
-#     # print("Sorted Boxes:",sorted_boxes)
-
-#     with open("models/class_mapping.pkl", "rb") as f:
-#         class_names = pickle.load(f)
-
-#     classifier = CharClassifier(num_classes=len(class_names))
-#     classifier.load_state_dict(torch.load("models/char_classifier1.pth", map_location=torch.device("cpu")))
-#     classifier.eval()
-
-#     transform = transforms.Compose([
-#     transforms.Grayscale(),
-#     transforms.Resize((28, 28)),
-#     transforms.ToTensor(),
-#     ])
-
-#     # Crop and Classify Each Detected Character
-#     char_crops = []
-#     predicted_chars = []
-#     for box in sorted_boxes:
-#         x1, y1, x2, y2 = map(int, box)
-#         crop = rgb_image[y1:y2, x1:x2]
-#         # cv2.imshow("Char",crop)
-#         # cv2.waitKey(1000)
-#         char_crops.append(crop)
-
-#         # Convert OpenCV image (numpy array) to PIL Image for transform
-#         if crop.shape[0] == 0 or crop.shape[1] == 0:
-#             print(f"Skipping empty crop with shape: {crop.shape}")
-#             continue
-
-#         try:
-#             pil_crop = Image.fromarray(crop)
-#         except Exception as e:
-#             print(f"Failed to convert crop to PIL image: {e}")
-#             continue
-
-#         # Apply classifier
-#         input_tensor = transform(pil_crop).unsqueeze(0)  # (1, 1, 28, 28)
-#         with torch.no_grad():
-#             outputs = classifier(input_tensor)
-#             predicted_index = outputs.argmax(dim=1).item()
-#             predicted_class = class_names[predicted_index]
-#             print(f"Predicted class: {predicted_class}")
-#         predicted_chars.append(predicted_class)
-#     license_text = ''.join(predicted_chars)
-#     print(f"Detected license text: {license_text}")
-#     return license_text
 
 def preprocess_plate(image, target_size=640):
     # Ensure grayscale
@@ -142,7 +49,6 @@ def preprocess_plate(image, target_size=640):
     right = pad_w - left
     padded = cv2.copyMakeBorder(resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
     return padded
-
 def group_and_sort_chars(char_data):
     # char_data: list of dicts with "center_y" and "center_x"
     if not char_data:
@@ -156,21 +62,20 @@ def group_and_sort_chars(char_data):
     top_sorted = sorted(top_row, key=lambda c: c["center_x"])
     bottom_sorted = sorted(bottom_row, key=lambda c: c["center_x"])
     return top_sorted, bottom_sorted
+# def group_and_sort_chars_by_top(char_data):
+#     # char_data: list of dicts with "bbox" key
+#     if not char_data:
+#         return [], []
+#     y1s = [c["bbox"][1] for c in char_data]  # y1 is the top of the box
+#     median_y1 = np.median(y1s)
+#     top_row = [c for c in char_data if c["bbox"][1] < median_y1]
+#     bottom_row = [c for c in char_data if c["bbox"][1] >= median_y1]
+#     # Sort each row by x (left to right)
+#     top_sorted = sorted(top_row, key=lambda c: c["bbox"][0])
+#     bottom_sorted = sorted(bottom_row, key=lambda c: c["bbox"][0])
+#     return top_sorted, bottom_sorted
 
-def group_and_sort_chars_by_top(char_data):
-    # char_data: list of dicts with "bbox" key
-    if not char_data:
-        return [], []
-    y1s = [c["bbox"][1] for c in char_data]  # y1 is the top of the box
-    median_y1 = np.median(y1s)
-    top_row = [c for c in char_data if c["bbox"][1] < median_y1]
-    bottom_row = [c for c in char_data if c["bbox"][1] >= median_y1]
-    # Sort each row by x (left to right)
-    top_sorted = sorted(top_row, key=lambda c: c["bbox"][0])
-    bottom_sorted = sorted(bottom_row, key=lambda c: c["bbox"][0])
-    return top_sorted, bottom_sorted
-
-def is_single_line(char_data, y_thresh=20):
+def is_single_line(char_data, y_thresh=30):
     y1s = [c["bbox"][1] for c in char_data]
     return max(y1s) - min(y1s) < y_thresh
 
@@ -190,7 +95,9 @@ def read_license_plate(image_input, conf_thres=0.2):
 
     results = model.predict(source=img_bgr, conf=conf_thres, save=False)
     boxes = results[0].boxes
-
+    if len(boxes) < 4:
+        print("Not Valid License plate.")
+        return ""
     char_data = []
     if not boxes:
         print("No characters detected.")
@@ -208,9 +115,8 @@ def read_license_plate(image_input, conf_thres=0.2):
     if not char_data:
         return ""
 
-    # --- Single-line plate handling ---
+    # Single-line plate handling 
     if is_single_line(char_data):
-        # Sort all by x, treat as one row
         sorted_chars = sorted(char_data, key=lambda c: c["bbox"][0])
         full_text = "".join([class_names[c["cls_id"]] for c in sorted_chars])
         # Visualization (optional)
@@ -230,8 +136,8 @@ def read_license_plate(image_input, conf_thres=0.2):
         print("Full plate text:", full_text)
         return full_text
 
-    # --- Two-line plate handling (existing logic) ---
-    top_sorted, bottom_sorted = group_and_sort_chars(char_data)
+    # Multi-line plate handling 
+    top_sorted, bottom_sorted = group_chars_by_kmeans(char_data, n_rows=2)
     top_sorted, bottom_sorted = enforce_plate_format(top_sorted, bottom_sorted, class_names)
 
     # Build strings from detected characters
@@ -261,8 +167,8 @@ def read_license_plate(image_input, conf_thres=0.2):
     return full_text
 
 def enforce_plate_format(top_sorted, bottom_sorted, class_names):
-    zone_codes = {"BA", "GA", "NA", "MA", "LU", "JA", "KO", "ME", "DHA", "SA"}
-
+    zone_codes = {"BA", "GA", "NA", "MA", "LU", "JA", "KO", "ME", "DHA", "SA","PRADESH", "BAGMATI", "LUMBINI", "GANDAKI", "MADESH", "SU"}
+    category_codes={"PA","RA", "VE", "HA", "KA", "KHA", "JA", "JHA", "YA","CHA","MA"}
     # Helper to get label from char dict
     def get_label(char):
         return class_names[char["cls_id"]]
@@ -275,6 +181,7 @@ def enforce_plate_format(top_sorted, bottom_sorted, class_names):
     # --- Zone code logic ---
     if top_sorted:
         first_label = get_label(top_sorted[0])
+        last_label = get_label(top_sorted[-1])
         # If first char is not digit
         if not first_label.isdigit():
             # If not a zone code, remove it
@@ -283,13 +190,31 @@ def enforce_plate_format(top_sorted, bottom_sorted, class_names):
             # If it is a zone code, check 2nd char
             elif len(top_sorted) > 1:
                 second_label = get_label(top_sorted[1])
-                if not second_label.isdigit():
+                if not second_label.isdigit() and second_label not in ["PRADESH","PRA"]:
                     top_sorted = [top_sorted[0]] + top_sorted[2:]  # Remove 2nd char
-
-    # --- If bottom row is now 5, remove the last char ---
+                if last_label in category_codes and len(top_sorted) > 4:
+                    #Remove 2nd last char 
+                    top_sorted = top_sorted[:-2] + top_sorted[-1:]  # Keep last char                    
+    # If bottom row is now 5, remove the last char
     if len(bottom_sorted) == 5:
         bottom_sorted = bottom_sorted[:-1]
 
     return top_sorted, bottom_sorted
+
+def group_chars_by_kmeans(char_data, n_rows=2):
+    if not char_data:
+        return [], []
+    y_coords = np.array([c["center_y"] for c in char_data]).reshape(-1, 1)
+    kmeans = KMeans(n_clusters=n_rows, random_state=0).fit(y_coords)
+    labels = kmeans.labels_
+    rows = [[] for _ in range(n_rows)]
+    for idx, label in enumerate(labels):
+        rows[label].append(char_data[idx])
+    # Sort each row by x (left to right)
+    sorted_rows = [sorted(row, key=lambda c: c["center_x"]) for row in rows]
+    # Ensure top row is above bottom row
+    if np.mean([c["center_y"] for c in sorted_rows[0]]) > np.mean([c["center_y"] for c in sorted_rows[1]]):
+        sorted_rows = sorted_rows[::-1]
+    return sorted_rows[0], sorted_rows[1]
 
 # read_license_plate("test_images/licenseplate_20250722_164043.jpg")

@@ -40,7 +40,6 @@ def save_record(request,speed: int, count: int, vehicle_image_path: str, license
     record.save()
     return record
 
-
 def match_license_plate(request, record):
     record_license_plate = record.licenseplate_no 
 
@@ -85,7 +84,7 @@ def match_license_plate(request, record):
             
             # Send email notification
             FineAmount = 500
-            body = f"Mr/Mrs. {vehicle.owner_name}, you have been fined Rs{FineAmount} for overspeeding the vehicle with LicensePlate {record.licenseplate_no}  at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
+            body = f"Mr/Mrs. {vehicle.owner_name}, you have been fined Rs{FineAmount} for overspeeding the vehicle with LicensePlate {record.licenseplate_no}  at {record.speed} km/h at station {record.stationID.location} where the limit is {record.stationID.speed_limit}. This is violation #{vehicle.violation_count}."
             email = vehicle.email_id
             send_mail(body, [email])
             
@@ -96,10 +95,11 @@ def get_mac_address():
     return ':'.join(['{:02x}'.format((mac >> ele) & 0xff)
                     for ele in range(0, 8 * 6, 8)][::-1])
 
-def get_speed_limit():
+def get_speed_limit(request):
     try:
-        mac_address=get_mac_address()
-        station=Station.objects.get(mac_address=mac_address)
-        return station.speed_limit
+        station_id = request.session.get('station_id')
+        if station_id:
+            station = Station.objects.get(id=station_id)
+            return station.speed_limit
     except:
-        return 20.0
+        return 15.0

@@ -18,8 +18,10 @@ from django.core.cache import cache
 from django.conf import settings
 from datetime import timedelta
 import csv,uuid
+from speed_estimation.db.db import get_speed_limit
 from datetime import datetime
-from speed_estimation.config import speed_limit
+
+
 
 def station_register(request):
     mac_address=get_mac_address()
@@ -85,7 +87,7 @@ def Records(request):
     Record_list = Record.objects.all()
     context = {
         'Record_list': Record_list,
-        'speed_limit':speed_limit,
+        'speed_limit':station.speed_limit,
         'station':station
     }
     return render(request, 'Records.html', context)
@@ -101,7 +103,6 @@ def video_feed(request):
         return HttpResponse(f"Error: {str(e)}", status=500)
     
 def get_notifications(request):
-    """Get notifications from database"""
     station_id = request.session.get('station_id')
     
     if station_id:
@@ -138,7 +139,6 @@ def get_notifications(request):
     })
 
 def clear_notifications(request):
-    """Mark notifications as read"""
     if request.method == 'POST':
         station_id = request.session.get('station_id')
         if station_id:
@@ -152,7 +152,6 @@ def clear_notifications(request):
     return JsonResponse({'status': 'error'}, status=400)
 
 def get_notification_stats(request):
-    """Get notification statistics for real-time updates"""
     alerts = request.session.get('alerts', [])
     
     # Get recent violations (last 24 hours)
@@ -160,7 +159,7 @@ def get_notification_stats(request):
     yesterday = datetime.now() - timedelta(days=1)
     recent_violations = Record.objects.filter(
         date__gte=yesterday,
-        speed__gt=speed_limit
+        speed__gt=get_speed_limit(request)
     ).count()
     
     return JsonResponse({
@@ -171,7 +170,6 @@ def get_notification_stats(request):
 
 # Add a new endpoint for getting violation statistics
 def get_violation_stats(request):
-    """Get violation statistics for the dashboard"""
     try:
         # Get total violations
         total_violations = Vehicle.objects.aggregate(
@@ -183,7 +181,7 @@ def get_violation_stats(request):
         yesterday = datetime.now() - timedelta(days=1)
         recent_violations = Record.objects.filter(
             date__gte=yesterday,
-            speed__gt=speed_limit
+            speed__gt=get_speed_limit(request)
         ).count()
         
         # Get alerts from session
@@ -238,7 +236,7 @@ def download_csv(request):
             record.licenseplate_no or 'N/A',
             record.speed,
             record.date.strftime('%Y-%m-%d'),
-            'Exceeding' if record.speed > speed_limit else 'Normal'
+            'Exceeding' if record.speed > record.station.speed_limit else 'Normal'
         ])
     
     return response

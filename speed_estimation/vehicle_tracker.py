@@ -5,9 +5,9 @@ import cv2
 from collections import deque
 from speed_estimation.utils.speed import calculate_speed
 from speed_estimation.utils.nepaliframe import draw_nepali_text_on_frame
-from speed_estimation.config import speed_limit,perspective_matrix
+from speed_estimation.config import perspective_matrix
 from speed_estimation.detections.detect_license import detect_license_plate
-from speed_estimation.db.db import save_record,match_license_plate
+from speed_estimation.db.db import get_speed_limit, save_record,match_license_plate
 from datetime import datetime 
 from speed_estimation.state_manager import vehicle_state
 
@@ -70,8 +70,9 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
             conf_text = f"{confidence:.2f}"
         else:
             conf_text = "N/A"
+        speed_limit = get_speed_limit(request)
         # Annotate label and log
-        if speed <=speed_limit:
+        if speed <= speed_limit:
             label = f"ID {tracker_id} {speed:.1f} km/h {conf_text}"
         else:
             label = f"ID {tracker_id} {speed:.1f} km/h Overspeeding {conf_text}"
@@ -89,7 +90,7 @@ def track_vehicles(request,frame: np.ndarray, detections: sv.Detections, fps) ->
                     continue
                 if crop.size > 0:
                     # saved_tracker_ids.add(tracker_id) #To be removed
-                    filename = f"{SPEEDING_DIR}/Vehicle2_{tracker_id}_{int(speed)}.jpg"
+                    filename = f"{SPEEDING_DIR}/Vehicle_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{tracker_id}_{int(speed)}.jpg"
                     cv2.imwrite(filename, crop)
                     print(f"Saved speeding vehicle crop to {filename}")
 

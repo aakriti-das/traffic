@@ -137,7 +137,10 @@ def read_license_plate(image_input, conf_thres=0.2):
         return full_text
 
     # Multi-line plate handling 
+    # top_sorted, bottom_sorted = group_and_sort_chars(char_data)
     top_sorted, bottom_sorted = group_chars_by_kmeans(char_data, n_rows=2)
+    print(" before Top Row:", [class_names[c["cls_id"]] for c in top_sorted])
+    print("Bottom Row:", [class_names[c["cls_id"]] for c in bottom_sorted])
     top_sorted, bottom_sorted = enforce_plate_format(top_sorted, bottom_sorted, class_names)
 
     # Build strings from detected characters
@@ -172,7 +175,10 @@ def enforce_plate_format(top_sorted, bottom_sorted, class_names):
     # Helper to get label from char dict
     def get_label(char):
         return class_names[char["cls_id"]]
-
+    if get_label(bottom_sorted[0]) in zone_codes:
+        #move all characters of bottom to start of top row
+        top_sorted = bottom_sorted + top_sorted
+        return top_sorted, []
     # --- Move first digit from top to bottom row ---
     if top_sorted and get_label(top_sorted[0]).isdigit():
         bottom_sorted = [top_sorted[0]] + bottom_sorted

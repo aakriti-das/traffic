@@ -18,7 +18,7 @@ def click_event(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN and len(points) < 4:
         points.append((x, y))
         print(f"Point {len(points)}: ({x}, {y})")
-        cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+        cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
         redraw_frame()
 
         # Automatically quit when 4 points selected
@@ -40,7 +40,7 @@ def redraw_frame():
         cv2.circle(display_frame, p, 5, (0, 255, 0), -1)
 
     # Resize for display (e.g., width=640, keep aspect ratio)
-    display_width = 640
+    display_width = 1000
     h, w = display_frame.shape[:2]
     scale = display_width / w
     display_resized = cv2.resize(display_frame, (display_width, int(h * scale)))

@@ -2,7 +2,7 @@ from PIL import ImageFont, ImageDraw, Image
 import numpy as np
 import cv2
 
-def draw_nepali_text_on_frame(frame, text, position, font_path="fonts/NotoSansDevanagari-Regular.ttf", font_size=64, color=(255, 0, 255)):
+def draw_nepali_text_on_frame(frame, text, position, font_path="fonts/NotoSansDevanagari-Regular.ttf", font_size=32, color=(255, 0, 255)):
     # Convert OpenCV image (BGR) to PIL image (RGB)
     cv2_im_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     pil_im = Image.fromarray(cv2_im_rgb)

@@ -8,16 +8,10 @@ from django.core.files.base import ContentFile
 from user_app.models import Record, Station,Vehicle, Alert
 from notification.mail import send_mail
 
-def save_record(speed: int, count: int, vehicle_image_path: str, license_plate_image_path: str = None, licenseplate_no: str = None, station: Station = None):
-    if station is None:
-        station = Station.objects.first()
-    if station is None:
-        station=Station(
-            areacode=23,
-            location="Baneshwor",
-            mac_address=get_mac_address()
-        )
-        station.save()
+def save_record(request,speed: int, count: int, vehicle_image_path: str, license_plate_image_path: str = None, licenseplate_no: str = None, station: Station = None):
+    station_id = request.session.get('station_id')
+    station = Station.objects.get(id=station_id) if station_id else Station.objects.first()
+    
     record = Record(
         stationID=station,
         speed=speed,
@@ -46,27 +40,12 @@ def save_record(speed: int, count: int, vehicle_image_path: str, license_plate_i
     record.save()
     return record
 
-def update_record(record_id: int,licenseplate_no: str = None,license_plate_image_np: any = None):
-    try:
-        record = Record.objects.get(id=record_id)
-        print("Record:",record)
-    except Record.DoesNotExist:
-        raise ValueError(f"No record found with id {record_id}")
-    if licenseplate_no:
-        record.licenseplate_no = licenseplate_no
-
-    if license_plate_image_np is not None:
-        image_file = numpy_to_django_file(license_plate_image_np, f"licenseplate_{record.id}.jpg")
-        record.license_plate_image.save(image_file.name, image_file, save=False)
-
-    record.save()
-    return record
 
 def match_license_plate(request, record):
     record_license_plate = record.licenseplate_no 
 
     matching_vehicles = Vehicle.objects.filter(licenseplate_no=record_license_plate)
-
+    print(f"Matching vehicles for license plate {record_license_plate}: {matching_vehicles.count()}")
     if matching_vehicles.exists():
         for vehicle in matching_vehicles:
             vehicle.violation_count = vehicle.violation_count + 1
@@ -78,14 +57,18 @@ def match_license_plate(request, record):
             alert_message = f'🚨 SPEEDING ALERT: Vehicle {record.licenseplate_no} detected at {record.speed} km/h! Owner: {vehicle.owner_name} | Contact: {vehicle.contact_number} | Violations: {vehicle.violation_count}'
             
             # Save alert to database instead of session
-            Alert.objects.create(
-                station=record.stationID,
-                alert_type='warning',
-                message=alert_message,
-                vehicle_id=vehicle.id,
-                speed=record.speed,
-                violation_count=vehicle.violation_count
-            )
+            try:
+                alert = Alert.objects.create(
+                    station= record.stationID,
+                    alert_type='warning',
+                    message=alert_message,
+                    vehicle_id=vehicle.id,
+                    speed=record.speed,
+                    violation_count=vehicle.violation_count
+                )
+                print(f"Alert saved to database: {alert_message}")
+            except Exception as e:
+                print(f"Error saving alert: {e}")
             
             # Also add to session for immediate access (optional)
             alerts = request.session.get('alerts', [])
@@ -102,24 +85,11 @@ def match_license_plate(request, record):
             
             # Send email notification
             FineAmount = 500
-            body = f"Mr/Mrs. {vehicle.owner_name}, your vehicle with LicensePlate {record.licenseplate_no} have been fined Rs{FineAmount} for overspeeding at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
+            body = f"Mr/Mrs. {vehicle.owner_name}, you have been fined Rs{FineAmount} for overspeeding the vehicle with LicensePlate {record.licenseplate_no}  at {record.speed} km/h at station {record.stationID.location}. This is violation #{vehicle.violation_count}."
             email = vehicle.email_id
             send_mail(body, [email])
             
             print(f"Alert saved to database: {alert_message}")
-
-def numpy_to_django_file(np_image, filename="licenseplate.jpg"):
-    # Convert OpenCV BGR to RGB
-    img_rgb = cv2.cvtColor(np_image, cv2.COLOR_BGR2RGB)
-    # Convert to PIL image
-    pil_img = Image.fromarray(img_rgb)
-
-    # Save to BytesIO buffer
-    buffer = BytesIO()
-    pil_img.save(buffer, format='JPEG')
-    image_file = ContentFile(buffer.getvalue(), name=filename)
-
-    return image_file
 
 def get_mac_address():
     mac = uuid.getnode()
@@ -132,6 +102,4 @@ def get_speed_limit():
         station=Station.objects.get(mac_address=mac_address)
         return station.speed_limit
     except:
-        return 30.0
-
- 
+        return 20.0

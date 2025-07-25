@@ -2,6 +2,7 @@ import cv2
 import os
 import django
 import sys
+import ast
 
 # Django setup
 sys.path.append(r"C:\Users\reala\TrafficSight\traffic")
@@ -67,9 +68,28 @@ while True:
 
 cv2.destroyAllWindows()
 
+def save_src_points_to_config(src_points, config_path="speed_estimation/config.py"):
+    # Format points for numpy
+    src_points_str = f"src_points = np.float32({src_points})\n"
+    # Read config.py
+    with open(config_path, "r") as f:
+        lines = f.readlines()
+    # Replace or add src_points line
+    with open(config_path, "w") as f:
+        replaced = False
+        for line in lines:
+            if line.strip().startswith("src_points"):
+                f.write(src_points_str)
+                replaced = True
+            else:
+                f.write(line)
+        if not replaced:
+            f.write(src_points_str)
+
 if len(points) == 4:
     print("\n✅ Selected src_points:")
     print("src_points =", points)
-
+    save_src_points_to_config(points)
+    print("✅ src_points saved to config.py")
 else:
     print("⚠️ You didn't select 4 points.")

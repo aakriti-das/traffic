@@ -1,6 +1,5 @@
-import ultralytics
 from ultralytics import YOLO
-from speed_estimation.config import vehicle_detection_model_path, VEHICLE_CLASSES
+from speed_estimation.config import vehicle_detection_model_path
 
 import supervision as sv
 import numpy as np
@@ -27,9 +26,8 @@ def detect_vehicle(frame: np.ndarray) -> tuple[sv.Detections, np.ndarray]:
         class_name = class_names[cls_id]
         conf = box.conf.item()
 
-        # if class_name in VEHICLE_CLASSES and conf > 0.1:
-        if conf > 0.1 and class_name in VEHICLE_CLASSES:
-            # print(f"Detected vehicle: {class_name} ")
+        if conf > 0.3:  # Confidence threshold
+            # Convert box coordinates to xyxy format
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             xyxy.append([x1, y1, x2, y2])
             confidences.append(conf)
